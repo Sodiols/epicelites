@@ -35,7 +35,7 @@ The publishable key is designed to be public: Row Level Security decides what it
 Optional:
 
 - `MEDIA_MAX_UPLOAD_MB` / `NEXT_PUBLIC_MEDIA_MAX_UPLOAD_MB`: upload size limit (default 10, matching the bucket limit).
-- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`: enables a Cloudflare Turnstile check on the contact form. Leave empty to disable.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` and `TURNSTILE_HOSTNAMES`: Cloudflare Turnstile on the contact form. The site key (`0x4AAAAAAFiyKoePy1cMAbWZ`) is public. Copy the secret from **Cloudflare > Turnstile > your widget** straight into `.env.local` and your host's secret settings; never commit it or paste it into chats or tickets. `TURNSTILE_HOSTNAMES` lists the domains allowed to issue tokens (your real domains in production); the widget's hostname list in Cloudflare must include the same domains. Cloudflare does not allow `localhost` on a widget, so for local development use Cloudflare's public test keys (site key `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA`), as `.env.example` shows. The server accepts test-key results only when not running in production, so they can never switch the check off on the live site. Once either key is set, every submission must pass verification: a missing secret or hostname list makes the form refuse messages rather than skip the check.
 
 While these variables are missing, the public site runs in setup mode from `content/team.json` and the dashboard explains that Supabase is not connected. Once they are set, Supabase is the only source of truth: if the database is unreachable or not migrated, pages show an error instead of stale content.
 
@@ -117,8 +117,9 @@ This site needs a server (sign-in, Server Actions, on-demand regeneration), so d
 
 1. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `NEXT_PUBLIC_SITE_URL` (your real domain, `https://...`) in the host's environment settings. They must be present at **build** time: the Supabase host is baked into the image configuration.
 2. In Supabase, set the production **Site URL** and add the production `/EEAUTHOR/auth/confirm` redirect URL (Step 1.3).
-3. In the dashboard, set **Website Settings > Website domain** to the same domain. It drives canonical links, the sitemap and sharing images.
-4. Deploy. Public pages are regenerated at most every 60 seconds, and immediately after any dashboard change.
+3. Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` and `TURNSTILE_HOSTNAMES` (production domains only) as well.
+4. In the dashboard, set **Website Settings > Website domain** to the same domain. It drives canonical links, the sitemap and sharing images.
+5. Deploy. Public pages are regenerated at most every 60 seconds, and immediately after any dashboard change.
 
 ## How publishing reaches the site
 
@@ -140,6 +141,6 @@ This site needs a server (sign-in, Server Actions, on-demand regeneration), so d
 
 ## Things that need your input
 
-- **Turnstile CAPTCHA** is off until you add the two keys.
+- **Turnstile in production:** set `TURNSTILE_SECRET_KEY` and `TURNSTILE_HOSTNAMES` (your real domains) in the host, and make sure the widget in Cloudflare lists those domains.
 - **Email delivery for password resets** needs custom SMTP for production volume (Step 1.5).
 - **Fixtures in `content/team.json`** are not imported automatically (the file has free-text dates). It currently has none; enter future fixtures in the dashboard.

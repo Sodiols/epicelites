@@ -1,11 +1,12 @@
 "use client";
 
-import Script from "next/script";
 import { useRef, useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRightIcon, CheckIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { easeOutExpo, snappy } from "@/lib/motion";
 import { submitContact } from "@/app/(public)/contact/actions";
+import { CONTACT_TURNSTILE_ACTION } from "@/lib/turnstile";
+import { Turnstile, type TurnstileHandle } from "./turnstile";
 
 type Field = "name" | "email" | "topic" | "message";
 type Errors = Partial<Record<Field, string>>;
@@ -39,6 +40,8 @@ export function ContactForm({ email }: { email: string | null }) {
   const [status, setStatus] = useState<Status>("idle");
   const [notice, setNotice] = useState("");
   const [pending, startTransition] = useTransition();
+  const turnstile = useRef<TurnstileHandle>(null);
+  const [verified, setVerified] = useState(false);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,6 +61,11 @@ export function ContactForm({ email }: { email: string | null }) {
       form.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
+    if (turnstileSiteKey && !verified) {
+      setStatus("failed");
+      setNotice("Complete the verification check above the button, then send again.");
+      return;
+    }
 
     setStatus("sending");
     setNotice("");
@@ -75,6 +83,8 @@ export function ContactForm({ email }: { email: string | null }) {
         setNotice(result.message);
         if ("fieldErrors" in result && result.fieldErrors) setErrors(result.fieldErrors as Errors);
       }
+      // Each token works once, so get a fresh one before any further submission.
+      turnstile.current?.reset();
     });
   };
 
@@ -114,8 +124,6 @@ export function ContactForm({ email }: { email: string | null }) {
 
   return (
     <form ref={formRef} noValidate onSubmit={onSubmit} className="frame grid gap-6 p-6 [--cut:28px] sm:p-10">
-      {turnstileSiteKey && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
-
       {/* Honeypot: hidden from people and assistive tech, tempting to bots. */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
         <label>
@@ -180,7 +188,9 @@ export function ContactForm({ email }: { email: string | null }) {
         <ErrorText f="message" />
       </div>
 
-      {turnstileSiteKey && <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" />}
+      {turnstileSiteKey && (
+        <Turnstile ref={turnstile} siteKey={turnstileSiteKey} action={CONTACT_TURNSTILE_ACTION} onToken={(t) => setVerified(Boolean(t))} />
+      )}
 
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button type="submit" disabled={busy} className="btn btn-primary group min-w-52 disabled:cursor-wait">

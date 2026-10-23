@@ -5,6 +5,8 @@ import { createAnonClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { fieldErrors, formToObject } from "@/lib/validations/common";
+import { CONTACT_TURNSTILE_ACTION } from "@/lib/turnstile";
+import { turnstileEnabled, verifyTurnstile } from "@/lib/turnstile-server";
 
 export type ContactResult =
   | { ok: true }
@@ -21,23 +23,11 @@ const schema = z.object({
     .max(5000, "Keep your message under 5000 characters."),
 });
 
-async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // CAPTCHA not configured
-  if (!token) return false;
-  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    body: new URLSearchParams({ secret, response: token, remoteip: ip }),
-    cache: "no-store",
-  });
-  const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
-  return data?.success === true;
-}
-
 /**
- * Stores a visitor inquiry. Server Actions only accept same-origin POSTs, the payload is
- * validated here and again by database constraints, and three throttles apply: per IP on
- * this server, per sender email and site-wide in the database.
+ * Stores a visitor inquiry. Server Actions only accept same-origin POSTs; when Turnstile is
+ * configured the token is verified before anything else runs; the payload is validated here
+ * and again by database constraints; and three throttles apply: per IP on this server, per
+ * sender email and site-wide in the database.
  */
 export async function submitContact(form: FormData): Promise<ContactResult> {
   if (!isSupabaseConfigured) {
@@ -47,10 +37,26 @@ export async function submitContact(form: FormData): Promise<ContactResult> {
   const raw = formToObject(form);
   if (JSON.stringify(raw).length > 12_000) return { ok: false, message: "That message is too long to send." };
 
+  const ip = await clientIp();
+
+  if (turnstileEnabled()) {
+    const check = await verifyTurnstile(form.get("cf-turnstile-response"), CONTACT_TURNSTILE_ACTION, ip);
+    if (!check.ok) {
+      return {
+        ok: false,
+        message:
+          check.reason === "misconfigured"
+            ? "Messages cannot be verified right now. Please email the team directly instead."
+            : check.reason === "unavailable"
+              ? "The verification service did not respond. Wait a moment and send again."
+              : "The verification check failed or expired. Complete it again and send.",
+      };
+    }
+  }
+
   // Honeypot: a field real visitors never see. Pretend success so bots learn nothing.
   if (raw.website) return { ok: true };
 
-  const ip = await clientIp();
   const limit = rateLimit(`contact:${ip}`, 5, 10 * 60_000);
   if (!limit.ok) {
     return { ok: false, message: `Too many messages from this connection. Try again in ${Math.ceil(limit.retryAfter / 60)} minutes.` };
@@ -59,10 +65,6 @@ export async function submitContact(form: FormData): Promise<ContactResult> {
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, message: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
-  }
-
-  if (!(await verifyTurnstile(raw["cf-turnstile-response"], ip))) {
-    return { ok: false, message: "Complete the verification check and send again." };
   }
 
   const { error } = await createAnonClient().rpc("submit_contact_message", {
