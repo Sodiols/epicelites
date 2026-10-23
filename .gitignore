@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+.env
+.env*.local
+.claude/settings.local.json
+supabase/.temp
+supabase/.branches
+*.log
+.DS_Store

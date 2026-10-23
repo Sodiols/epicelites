@@ -1,0 +1,25 @@
+{
+  "teamName": "Epic Elites",
+  "game": "Free Fire",
+  "tagline": "RISE ABOVE",
+  "description": "Epic Elites is a Free Fire esports team. Follow the roster, match announcements, team identity and official updates here.",
+  "email": "",
+  "socials": {
+    "facebook": "",
+    "instagram": "",
+    "youtube": "",
+    "tiktok": "",
+    "discord": ""
+  },
+  "players": [
+    {"name": "PLAYER 01", "role": "Role to be confirmed", "number": "01", "image": "player-01.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "PLAYER 02", "role": "Role to be confirmed", "number": "02", "image": "player-02.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "PLAYER 03", "role": "Role to be confirmed", "number": "03", "image": "player-03.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "PLAYER 04", "role": "Role to be confirmed", "number": "04", "image": "player-04.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "PLAYER 05", "role": "Role to be confirmed", "number": "05", "image": "player-05.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "PLAYER 06", "role": "Role to be confirmed", "number": "06", "image": "player-06.webp", "bio": "Player details will be published when the roster is finalized."}
+  ],
+  "upcomingMatches": [],
+  "results": [],
+  "partners": []
+}

@@ -1,0 +1,475 @@
+@import "tailwindcss";
+
+/*
+  Epic Elites design tokens.
+  The palette is lifted from the team kit: a near-black jersey body,
+  the violet of the crest, and the white of the cuff piping.
+  The site is dark by design because the brand is a black kit; it does not invert.
+
+  Layer scale (z-index), used nowhere else:
+    grain 40 / mobile menu 45 (under the header so its close button stays reachable) / header 50 / dialogs 70 / route curtain 90 / skip link 100
+*/
+@theme {
+  --color-night: #0b0a0f;
+  --color-carbon: #14121b;
+  --color-graphite: #1d1a27;
+  --color-line: #2c2838;
+  --color-smoke: #9b97a8;
+  --color-bone: #eeecf3;
+  --color-violet: #8e6bff;
+  --color-violet-deep: #3a2378;
+  --color-storm: #1e1440;
+
+  --font-sans: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --cut: 14px;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-night);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-stretch: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  /* Film grain sits on a fixed, non-scrolling layer so it never repaints with content. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: var(--color-violet);
+    color: var(--color-night);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: 4px;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  select option {
+    background: var(--color-carbon);
+    color: var(--color-bone);
+  }
+}
+
+/* Display type: Archivo pushed to its narrowest width. One family, two widths. */
+@utility font-display {
+  font-family: var(--font-sans);
+  font-stretch: 62%;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+@utility font-wide {
+  font-family: var(--font-sans);
+  font-stretch: 125%;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/*
+  Shape rule: interactive controls and framed panels share one 45deg corner cut
+  (top-right and bottom-left), echoing the angular panels printed on the jersey.
+  The cut lives on a pseudo-element so focus outlines are never clipped.
+*/
+@utility chamfer {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% 100%,
+    var(--cut) 100%,
+    0 calc(100% - var(--cut))
+  );
+}
+
+@layer components {
+  .btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding-inline: 1.125rem;
+    font-stretch: 112%;
+    font-weight: 650;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    touch-action: manipulation;
+    transition: color 0.35s var(--ease-out-expo);
+  }
+
+  @media (min-width: 40rem) {
+    .btn {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .btn::before,
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+
+  /* The fill wipes in from the left on hover rather than cross-fading. */
+  .btn::after {
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.55s var(--ease-out-expo);
+  }
+
+  .btn:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .btn:active {
+    translate: 0 1px;
+  }
+
+  .btn-primary {
+    color: var(--color-night);
+  }
+
+  .btn-primary::before {
+    background: var(--color-violet);
+  }
+
+  .btn-primary::after {
+    background: var(--color-bone);
+  }
+
+  .btn-ghost {
+    color: var(--color-bone);
+  }
+
+  /* Hairline border that follows the chamfer: an outer shape with an inner fill inset by 1px. */
+  .btn-ghost::before {
+    background: #4a4459;
+    transition: background-color 0.35s var(--ease-out-expo);
+  }
+
+  .btn-ghost::after {
+    inset: 1px;
+    transform: none;
+    background:
+      linear-gradient(var(--color-violet), var(--color-violet)) no-repeat left / 0% 100%,
+      var(--btn-bg, var(--color-night));
+    transition: background-size 0.55s var(--ease-out-expo);
+  }
+
+  .btn-ghost:hover::before {
+    background: var(--color-violet);
+  }
+
+  .btn-ghost:hover::after {
+    transform: none;
+    background-size: 100% 100%, auto;
+  }
+
+  .btn-ghost:hover {
+    color: var(--color-night);
+  }
+
+  /* A framed panel: 1px line border that follows the chamfer. */
+  .frame {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-line);
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+
+  .frame::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    background: var(--color-carbon);
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+
+  .link-underline {
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+    transition: background-size 0.5s var(--ease-out-expo), color 0.3s;
+  }
+
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  .field {
+    width: 100%;
+    min-height: 3.25rem;
+    background: var(--color-night);
+    border: 1px solid var(--color-line);
+    color: var(--color-bone);
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    transition: border-color 0.25s, background-color 0.25s;
+  }
+
+  .field::placeholder {
+    color: #77738a;
+  }
+
+  .field:hover {
+    border-color: #4a4459;
+  }
+
+  .field:focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: 0;
+    border-color: transparent;
+  }
+
+  .field[aria-invalid="true"] {
+    border-color: #ff7a8a;
+  }
+}
+
+/* Rendered news articles (output of lib/markdown.ts). */
+@layer components {
+  .article-body {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: #c9c6d3;
+  }
+  .article-body > * + * {
+    margin-top: 1.25em;
+  }
+  .article-body h2,
+  .article-body h3 {
+    color: var(--color-bone);
+    font-weight: 650;
+    line-height: 1.2;
+    margin-top: 2em;
+  }
+  .article-body h2 {
+    font-size: 1.75rem;
+  }
+  .article-body h3 {
+    font-size: 1.375rem;
+  }
+  .article-body a {
+    color: var(--color-violet);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .article-body strong {
+    color: var(--color-bone);
+  }
+  .article-body ul,
+  .article-body ol {
+    padding-left: 1.4em;
+  }
+  .article-body ul {
+    list-style: square;
+  }
+  .article-body ol {
+    list-style: decimal;
+  }
+  .article-body li + li {
+    margin-top: 0.4em;
+  }
+  .article-body li::marker {
+    color: var(--color-violet);
+  }
+  .article-body blockquote {
+    border-left: 2px solid var(--color-violet);
+    padding-left: 1.25em;
+    color: var(--color-bone);
+    font-size: 1.25rem;
+  }
+  .article-body img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/*
+  Admin console controls. Denser than the public site: 40px controls, square corners,
+  1px borders, sentence-case labels. Same palette, so it is recognisably Epic Elites.
+*/
+@layer components {
+  .a-input {
+    width: 100%;
+    min-height: 2.5rem;
+    background: var(--color-night);
+    border: 1px solid var(--color-line);
+    color: var(--color-bone);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    transition: border-color 0.2s;
+  }
+  .a-input::placeholder {
+    color: #77738a;
+  }
+  .a-input:hover {
+    border-color: #4a4459;
+  }
+  .a-input:focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: -1px;
+    border-color: transparent;
+  }
+  .a-input[aria-invalid="true"] {
+    border-color: #ff7a8a;
+  }
+  .a-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  select.a-input {
+    appearance: none;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 256 256'%3E%3Cpath fill='%239b97a8' d='M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+  }
+  input[type="datetime-local"].a-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.75);
+    cursor: pointer;
+  }
+
+  .a-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-bone);
+  }
+  .a-help {
+    font-size: 0.75rem;
+    color: var(--color-smoke);
+  }
+
+  .a-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    touch-action: manipulation;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s,
+      color 0.2s;
+  }
+  .a-btn:active:not(:disabled) {
+    translate: 0 1px;
+  }
+  .a-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .a-btn-primary {
+    background: var(--color-violet);
+    color: var(--color-night);
+  }
+  .a-btn-primary:hover:not(:disabled) {
+    background: #a389ff;
+  }
+  .a-btn-secondary {
+    border-color: var(--color-line);
+    background: var(--color-carbon);
+    color: var(--color-bone);
+  }
+  .a-btn-secondary:hover:not(:disabled) {
+    border-color: #4a4459;
+    background: var(--color-graphite);
+  }
+  .a-btn-ghost {
+    color: var(--color-smoke);
+  }
+  .a-btn-ghost:hover:not(:disabled) {
+    color: var(--color-bone);
+    background: var(--color-carbon);
+  }
+  .a-btn-danger {
+    border-color: #5c2a33;
+    color: #ff9aa6;
+  }
+  .a-btn-danger:hover:not(:disabled) {
+    background: #2a1218;
+    border-color: #ff7a8a;
+  }
+  .a-btn-sm {
+    min-height: 2rem;
+    padding: 0 0.625rem;
+    font-size: 0.75rem;
+  }
+  .a-btn-icon {
+    width: 2.5rem;
+    padding: 0;
+  }
+
+  .a-panel {
+    background: var(--color-carbon);
+    border: 1px solid var(--color-line);
+  }
+}
+
+/* Continuous marquee motion stops for people who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
