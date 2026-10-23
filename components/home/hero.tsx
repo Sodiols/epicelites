@@ -23,7 +23,7 @@ const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 /**
  * The safe zone. In Free Fire the playable circle shrinks and everything outside it
  * is lost to the storm. Here the zone sweeps in on load, then keeps closing around
- * the player as the visitor scrolls through the pinned hero.
+ * the team crest as the visitor scrolls through the pinned hero.
  */
 export function Hero({ subtitle }: { subtitle: string }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -48,13 +48,14 @@ export function Hero({ subtitle }: { subtitle: string }) {
 
   const textY = useTransform(closing, [0, 1], [0, -90]);
   const textOpacity = useTransform(closing, [0, 0.75], [1, 0]);
-  const playerScale = useTransform(closing, [0, 1], [1, 0.92]);
+  // The crest shrinks with the zone so it always stays inside the ring.
+  const crestScale = useTransform(closing, [0, 1], [1, 0.62]);
 
   // Pointer parallax: three depths moving at different rates, all on springs.
   const px = useSpring(0, { stiffness: 60, damping: 18 });
   const py = useSpring(0, { stiffness: 60, damping: 18 });
-  const playerX = useTransform(px, (v) => v * -22);
-  const playerY = useTransform(py, (v) => v * -10);
+  const crestX = useTransform(px, (v) => v * -22);
+  const crestY = useTransform(py, (v) => v * -10);
   const ringX = useTransform(px, (v) => v * 14);
   const ringY = useTransform(py, (v) => v * 10);
 
@@ -72,7 +73,7 @@ export function Hero({ subtitle }: { subtitle: string }) {
       onPointerMove={onPointerMove}
     >
       <div className="sticky top-0 h-[100dvh] min-h-[38rem] overflow-hidden [--zx:50%] [--zy:74%] lg:[--zx:68%] lg:[--zy:54%]">
-        {/* Inside the zone: a soft lift behind the player. */}
+        {/* Inside the zone: a soft lift behind the crest. */}
         <div
           aria-hidden
           className="absolute inset-0"
@@ -134,31 +135,27 @@ export function Hero({ subtitle }: { subtitle: string }) {
           </motion.svg>
         </motion.div>
 
-        {/* The player, standing in the zone. */}
+        {/* The crest, held inside the zone. Its wings unfold from the centre spine on load. */}
         <motion.div
-          className="absolute bottom-0 left-[var(--zx)] h-[54dvh] w-auto -translate-x-1/2 lg:h-[88dvh]"
-          style={{ x: playerX, y: playerY, scale: playerScale, transformOrigin: "50% 100%" }}
+          className="absolute top-[var(--zy)] left-[var(--zx)] w-[min(52vmin,34rem)] -translate-x-1/2 -translate-y-1/2"
+          style={{ x: crestX, y: crestY, scale: crestScale }}
         >
           <motion.div
-            className="h-full"
-            initial={reduce ? false : { clipPath: "inset(100% 0% 0% 0%)", y: 60 }}
-            animate={{ clipPath: "inset(0% 0% 0% 0%)", y: 0 }}
-            transition={{ duration: 1.3, ease: easeOutExpo, delay: CURTAIN_DELAY + 0.35 }}
+            initial={reduce ? false : { clipPath: "inset(0% 50% 0% 50%)", scale: 0.86, y: 24 }}
+            animate={{ clipPath: "inset(0% 0% 0% 0%)", scale: 1, y: 0 }}
+            transition={{ duration: 1.4, ease: easeOutExpo, delay: CURTAIN_DELAY + 0.35 }}
           >
             <Image
-              src="/images/player-03.webp"
-              alt="Epic Elites player in the black and violet team jersey, arms crossed"
-              width={1060}
-              height={1484}
+              src="/images/epic-elites-mark.svg"
+              alt="Epic Elites crest"
+              width={2328}
+              height={1640}
               priority
-              sizes="(min-width: 1024px) 60vh, 45vh"
-              className="h-full w-auto object-contain object-bottom"
+              unoptimized
+              className="h-auto w-full"
             />
           </motion.div>
         </motion.div>
-
-        {/* Fade the player's base into the page so the cutout never ends on a hard edge. */}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t lg:h-40 from-night to-transparent" />
 
         <motion.div
           className="relative mx-auto flex h-full max-w-[1400px] flex-col px-4 pt-28 sm:px-8 lg:justify-center lg:pt-16"
