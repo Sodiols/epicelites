@@ -88,7 +88,7 @@ export function KitScrub({ front, back }: { front: string; back: string }) {
 
           <div className="order-first flex justify-center [perspective:1400px] md:order-none md:col-span-7">
             <motion.div
-              className="relative aspect-[711/1106] h-[36dvh] md:h-[min(68dvh,40rem)] [transform-style:preserve-3d]"
+              className="relative aspect-[1000/1106] h-[36dvh] md:h-[min(68dvh,40rem)] [transform-style:preserve-3d]"
               style={{ rotateY, rotateX, scale }}
             >
               {[

@@ -77,7 +77,7 @@ export default async function AboutPage() {
             />
           </Link>
         </div>
-        <div className="chamfer relative aspect-[1422/1106] [--cut:32px] lg:col-span-7">
+        <div className="chamfer relative aspect-[1900/1106] [--cut:32px] lg:col-span-7">
           <ClipReveal className="absolute inset-0">
             <Image src={settings.kitImageUrl} alt="Epic Elites jersey artwork, front and back" fill sizes="(min-width: 1024px) 55vw, 92vw" className="object-cover" />
           </ClipReveal>

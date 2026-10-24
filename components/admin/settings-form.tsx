@@ -59,9 +59,9 @@ export function SettingsForm({ settings, matches, news }: { settings: SettingsRo
 
       <FormSection title="Jersey" description="Drives the scroll-turning jersey on the homepage and the 3D viewer on Media.">
         <div className="grid gap-6 sm:grid-cols-3">
-          <ImageUpload name="jersey_front" label="Jersey front" folder="brand" aspect="aspect-[711/1106]" fit="object-cover" initial={img(s.jersey_front_url)} />
-          <ImageUpload name="jersey_back" label="Jersey back" folder="brand" aspect="aspect-[711/1106]" fit="object-cover" initial={img(s.jersey_back_url)} />
-          <ImageUpload name="kit_image" label="Kit presentation image" folder="brand" aspect="aspect-[1422/1106]" fit="object-cover" initial={img(s.kit_image_url)} />
+          <ImageUpload name="jersey_front" label="Jersey front" folder="brand" aspect="aspect-[1000/1106]" fit="object-cover" initial={img(s.jersey_front_url)} />
+          <ImageUpload name="jersey_back" label="Jersey back" folder="brand" aspect="aspect-[1000/1106]" fit="object-cover" initial={img(s.jersey_back_url)} />
+          <ImageUpload name="kit_image" label="Kit presentation image" folder="brand" aspect="aspect-[1900/1106]" fit="object-cover" initial={img(s.kit_image_url)} />
         </div>
         <TextField label="Edition or season label" name="jersey_edition_label" maxLength={60} defaultValue={s.jersey_edition_label ?? ""} placeholder="2026 home kit" error={errors.jersey_edition_label} />
       </FormSection>

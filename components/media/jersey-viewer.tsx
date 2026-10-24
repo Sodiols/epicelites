@@ -105,7 +105,7 @@ export function JerseyViewer({
             className="absolute bottom-[3%] h-6 w-1/2 rounded-[50%] bg-violet/25 blur-xl"
             style={{ scaleX: shadowScale }}
           />
-          <motion.div className="relative h-[92%] aspect-[711/1106] [transform-style:preserve-3d]" style={{ rotateY }}>
+          <motion.div className="relative h-[92%] aspect-[1000/1106] [transform-style:preserve-3d]" style={{ rotateY }}>
             {[
               { src: front, alt: "Epic Elites jersey, front", back: false },
               { src: back, alt: "Epic Elites jersey, back", back: true },

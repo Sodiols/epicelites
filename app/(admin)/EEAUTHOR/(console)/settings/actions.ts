@@ -12,10 +12,10 @@ import { assetUrl, fieldErrors, formToObject, optionalHttpsUrl, optionalText, re
 const BRAND = {
   logo: "/images/epic-elites-mark.webp",
   favicon: "/images/epic-elites-mark.webp",
-  og_image: "/images/team-kit.webp",
-  jersey_front: "/images/jersey-front.webp",
-  jersey_back: "/images/jersey-back.webp",
-  kit_image: "/images/team-kit.webp",
+  og_image: "/images/team-kit-v2.webp",
+  jersey_front: "/images/jersey-front-v2.webp",
+  jersey_back: "/images/jersey-back-v2.webp",
+  kit_image: "/images/team-kit-v2.webp",
 } as const;
 
 const optionalId = z
