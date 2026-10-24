@@ -5,6 +5,9 @@ import { getSettings } from "@/lib/data/public";
 import { siteUrl } from "@/lib/supabase/env";
 import "./globals.css";
 
+/** The crest WebP the database ships with; when unchanged, the generated square icons are used. */
+const DEFAULT_FAVICON = "/images/epic-elites-mark.webp";
+
 const archivo = Archivo({
   subsets: ["latin"],
   axes: ["wdth"],
@@ -30,7 +33,19 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       settings.description ??
       `Official home of ${settings.teamName}, a ${settings.game} esports team. Meet the roster, explore the kit and follow official match updates.`,
-    icons: { icon: settings.faviconUrl },
+    // Square icons generated from the crest (scripts/generate-icons.mjs). A favicon uploaded
+    // in Website Settings replaces the tab icon; the home-screen icon stays the generated one.
+    icons:
+      settings.faviconUrl === DEFAULT_FAVICON
+        ? {
+            icon: [
+              { url: "/favicon.ico", sizes: "48x48" },
+              { url: "/icon.svg", type: "image/svg+xml" },
+            ],
+            apple: "/apple-touch-icon.png",
+          }
+        : { icon: settings.faviconUrl, apple: "/apple-touch-icon.png" },
+    manifest: "/manifest.webmanifest",
     // Google Search Console ownership check.
     verification: { google: "iEQ4_JCjqMIA2XScyuNewP0E9x8IZbxG1sdlqgcoWXY" },
     openGraph: {
