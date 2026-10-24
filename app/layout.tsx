@@ -31,6 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
       settings.description ??
       `Official home of ${settings.teamName}, a ${settings.game} esports team. Meet the roster, explore the kit and follow official match updates.`,
     icons: { icon: settings.faviconUrl },
+    // Google Search Console ownership check.
+    verification: { google: "iEQ4_JCjqMIA2XScyuNewP0E9x8IZbxG1sdlqgcoWXY" },
     openGraph: {
       type: "website",
       siteName: settings.teamName,
