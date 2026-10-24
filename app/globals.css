@@ -19,6 +19,8 @@
   --color-violet: #8e6bff;
   --color-violet-deep: #3a2378;
   --color-storm: #1e1440;
+  /* Broadcast red: only ever means "on air right now" (live matches). */
+  --color-live: #c8162e;
 
   --font-sans: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -179,6 +181,23 @@
 
   .btn-primary::after {
     background: var(--color-bone);
+  }
+
+  /* Live stream: broadcast red, wiping to bone on hover like the primary button. */
+  .btn-live {
+    color: var(--color-bone);
+  }
+
+  .btn-live::before {
+    background: var(--color-live);
+  }
+
+  .btn-live::after {
+    background: var(--color-bone);
+  }
+
+  .btn-live:hover {
+    color: var(--color-live);
   }
 
   .btn-ghost {

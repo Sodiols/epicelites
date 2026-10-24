@@ -9,6 +9,7 @@ import type { Match } from "@/lib/data/public";
 import { MATCH_FORMATS, MATCH_STATUSES } from "@/lib/labels";
 import { matchContext, matchHeadline, resultParts } from "@/lib/match-display";
 import { formatMatchTime } from "@/lib/time";
+import { StreamButton } from "@/components/stream-button";
 
 type Tab = "upcoming" | "results";
 
@@ -141,10 +142,16 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
           <span className="min-w-0">
             {flagged && (
               <span
-                className={`mb-2 inline-block px-2 py-0.5 text-xs font-semibold uppercase ${
-                  m.status === "live" ? "bg-violet text-night" : "border border-line text-smoke"
+                className={`mb-2 inline-flex items-center gap-2 px-2 py-0.5 text-xs font-semibold uppercase ${
+                  m.status === "live" ? "bg-live text-bone" : "border border-line text-smoke"
                 }`}
               >
+                {m.status === "live" && (
+                  <span className="relative size-1.5" aria-hidden>
+                    <span className="absolute inset-0 rounded-full bg-current motion-safe:animate-ping" />
+                    <span className="relative block size-1.5 rounded-full bg-current" />
+                  </span>
+                )}
                 {MATCH_STATUSES[m.status]}
               </span>
             )}
@@ -166,17 +173,13 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
           ) : (
             <span className="text-sm text-smoke">{m.organizer ?? MATCH_FORMATS[m.format]}</span>
           )}
-          <span className="mt-2 flex gap-4 text-sm">
-            {m.stream_url && (
-              <a href={m.stream_url} target="_blank" rel="noopener noreferrer" className="link-underline text-bone hover:text-violet">
-                Stream
-              </a>
-            )}
+          <span className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm md:justify-end">
             {m.info_url && (
               <a href={m.info_url} target="_blank" rel="noopener noreferrer" className="link-underline text-bone hover:text-violet">
                 Event info
               </a>
             )}
+            {m.stream_url && <StreamButton url={m.stream_url} status={m.status} size="sm" />}
           </span>
         </span>
       </div>

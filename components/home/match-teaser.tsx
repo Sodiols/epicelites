@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
+import { StreamButton } from "@/components/stream-button";
 import { ScrambleText } from "@/components/ui/scramble-text";
 import type { Match } from "@/lib/data/public";
 import { matchContext, matchHeadline, resultParts } from "@/lib/match-display";
@@ -19,7 +20,16 @@ export function MatchTeaser({ next, latest, teamName }: { next: Match | null; la
     <section aria-labelledby="next-match-title" className="px-4 py-24 sm:px-8 md:py-32">
       <div className="frame mx-auto grid max-w-[1400px] gap-10 p-6 [--cut:28px] sm:p-10 md:grid-cols-[1.4fr_1fr] md:p-14">
         <div>
-          <h2 id="next-match-title" className="text-sm font-semibold text-smoke">
+          <h2
+            id="next-match-title"
+            className={`flex items-center gap-2 text-sm font-semibold ${next?.status === "live" ? "text-bone" : "text-smoke"}`}
+          >
+            {next?.status === "live" && (
+              <span className="relative size-2 text-live" aria-hidden>
+                <span className="absolute inset-0 rounded-full bg-current motion-safe:animate-ping" />
+                <span className="relative block size-2 rounded-full bg-current" />
+              </span>
+            )}
             {next?.status === "live" ? "Live now" : "Next match"}
           </h2>
           {next && headline && when ? (
@@ -48,17 +58,7 @@ export function MatchTeaser({ next, latest, teamName }: { next: Match | null; la
               <p className="mt-2 font-mono text-sm text-smoke">
                 <time dateTime={next.starts_at}>{when.full}</time>
               </p>
-              {next.stream_url && (
-                <a
-                  href={next.stream_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-underline mt-5 inline-flex items-center gap-2 font-semibold text-violet"
-                >
-                  Watch the stream
-                  <ArrowRightIcon size={16} aria-hidden />
-                </a>
-              )}
+              {next.stream_url && <StreamButton url={next.stream_url} status={next.status} className="mt-7" />}
             </>
           ) : (
             <>
