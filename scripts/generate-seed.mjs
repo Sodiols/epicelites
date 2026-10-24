@@ -14,16 +14,16 @@ const team = JSON.parse(readFileSync(join(root, "content/team.json"), "utf8"));
 
 // Pixel sizes of the artwork shipped in public/images.
 const sizes = {
-  "player-01.webp": [422, 591],
+  "player-01.webp": [1060, 1484],
   "player-02.webp": [447, 559],
-  "player-03.webp": [1060, 1484],
+  "player-03.webp": [422, 591],
   "player-04.webp": [422, 591],
-  "player-05.webp": [422, 591],
-  "player-06.webp": [571, 793],
-  "team-kit.webp": [1422, 1106],
+  "player-05.png": [571, 793],
+  "player-06.webp": [422, 591],
+  "team-kit-v2.webp": [1900, 1106],
 };
-// Portraits photographed on black rather than cut out.
-const onBlack = new Set(["player-06.webp"]);
+// Portraits photographed on black rather than cut out (none: every portrait is now transparent).
+const onBlack = new Set();
 
 const q = (v) => (v === null || v === undefined || v === "" ? "null" : `'${String(v).replace(/'/g, "''")}'`);
 const slugify = (s) =>
@@ -72,8 +72,8 @@ lines.push("-- Gallery: the kit image and every player portrait, published as th
 lines.push(
   `insert into public.media_items (kind, category, title, caption, alt_text, url, width, height, is_published, display_order)
 select 'image', 'kit', 'Team kit', 'Team kit, front and back', 'Epic Elites jersey shown front and back on mannequins',
-       '/images/team-kit.webp', 1422, 1106, true, 0
-where not exists (select 1 from public.media_items where url = '/images/team-kit.webp');`,
+       '/images/team-kit-v2.webp', 1900, 1106, true, 0
+where not exists (select 1 from public.media_items where url = '/images/team-kit-v2.webp');`,
 );
 team.players.forEach((p, i) => {
   const [w, h] = sizes[p.image] ?? [null, null];
@@ -96,7 +96,7 @@ values ('the-epic-elites-kit-is-here', 'The Epic Elites kit is here',
   ${q(
     "The official Epic Elites jersey pairs a black body with violet piping and angular panels.\n\nThe winged EE crest sits over the heart, the monogram opposite, and Rise Above runs down the side panel. On the back, every player's tag and number sit across the shoulders.\n\n[See the kit from every angle](/media)",
   )},
-  '/images/team-kit.webp', 'The Epic Elites jersey, front and back', 'official_announcements', 'draft')
+  '/images/team-kit-v2.webp', 'The Epic Elites jersey, front and back', 'official_announcements', 'draft')
 on conflict (slug) do nothing;`,
 );
 lines.push("");

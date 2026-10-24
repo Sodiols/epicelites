@@ -113,8 +113,10 @@ r = await anon("select * from public.players");
 check("anon cannot read the players table directly", r.error !== null);
 r = await anon("select count(*)::int n from public.public_media");
 check("anon reads published gallery media", r.rows[0]?.n === 7, r.error?.message);
+const team = JSON.parse(readFileSync(join(root, "content/team.json"), "utf8"));
+const firstPlayer = team.players.find((p) => p.image === "player-01.webp");
 r = await anon("select caption from public.public_media where url = '/images/player-01.webp'");
-check("player gallery captions follow the player's name", r.rows[0]?.caption === "PLAYER 01");
+check("player gallery captions follow the player's name", r.rows[0]?.caption === firstPlayer?.name, JSON.stringify(r.rows));
 r = await anon("select count(*)::int n from public.public_news");
 check("draft news is not public", r.rows[0]?.n === 0);
 for (const t of ["contact_messages", "audit_logs", "admin_users", "news_posts", "matches", "team_settings"]) {

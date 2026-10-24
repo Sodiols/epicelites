@@ -20,12 +20,12 @@ type LegacyTeam = {
 const team = raw as LegacyTeam;
 
 const sizes: Record<string, [number, number]> = {
-  "player-01.webp": [422, 591],
+  "player-01.webp": [1060, 1484],
   "player-02.webp": [447, 559],
-  "player-03.webp": [1060, 1484],
+  "player-03.webp": [422, 591],
   "player-04.webp": [422, 591],
-  "player-05.webp": [422, 591],
-  "player-06.webp": [571, 793],
+  "player-05.png": [571, 793],
+  "player-06.webp": [422, 591],
 };
 
 export const fallbackSettings: SiteSettings = {
@@ -41,10 +41,10 @@ export const fallbackSettings: SiteSettings = {
     .map(([network, url]) => ({ network, url })),
   logoUrl: "/images/epic-elites-mark.webp",
   faviconUrl: "/images/epic-elites-mark.webp",
-  ogImageUrl: "/images/team-kit.webp",
-  jerseyFrontUrl: "/images/jersey-front.webp",
-  jerseyBackUrl: "/images/jersey-back.webp",
-  kitImageUrl: "/images/team-kit.webp",
+  ogImageUrl: "/images/team-kit-v2.webp",
+  jerseyFrontUrl: "/images/jersey-front-v2.webp",
+  jerseyBackUrl: "/images/jersey-back-v2.webp",
+  kitImageUrl: "/images/team-kit-v2.webp",
   jerseyEditionLabel: null,
   heroSubtitle: "Six players in one black and violet kit, built to outlast every zone.",
   statement:
@@ -68,7 +68,7 @@ export const fallbackPlayers: Player[] = team.players.map((p) => {
     role: p.role,
     number: p.number,
     bio: p.bio,
-    image: { src: `/images/${p.image}`, width, height, onBlack: p.image === "player-06.webp" },
+    image: { src: `/images/${p.image}`, width, height, onBlack: false },
     region: null,
     socials: [],
     isFeatured: false,
@@ -84,8 +84,8 @@ export const fallbackMedia: MediaItem[] = [
     title: "Team kit",
     caption: "Team kit, front and back",
     alt_text: "Epic Elites jersey shown front and back on mannequins",
-    url: "/images/team-kit.webp",
-    width: 1422,
+    url: "/images/team-kit-v2.webp",
+    width: 1900,
     height: 1106,
     on_black: false,
     video_url: null,
