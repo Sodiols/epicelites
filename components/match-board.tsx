@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarBlankIcon, TrophyIcon } from "@phosphor-icons/react";
 import { easeOutExpo, snappy } from "@/lib/motion";
@@ -125,26 +126,39 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
           <time dateTime={m.starts_at}>{when.day}</time>
           <span className="block">{when.time}</span>
         </span>
-        <span>
-          {flagged && (
-            <span
-              className={`mb-2 inline-block px-2 py-0.5 text-xs font-semibold uppercase ${
-                m.status === "live" ? "bg-violet text-night" : "border border-line text-smoke"
-              }`}
-            >
-              {MATCH_STATUSES[m.status]}
+        <span className="flex items-start gap-4 sm:gap-6">
+          {m.cover_url && (
+            <span className="chamfer relative aspect-[16/10] w-24 shrink-0 overflow-hidden bg-carbon [--cut:10px] sm:w-36">
+              <Image
+                src={m.cover_url}
+                alt={`${m.event_name} cover`}
+                fill
+                sizes="(min-width: 640px) 144px, 96px"
+                className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
+              />
             </span>
           )}
-          <span className="font-display block text-[clamp(1.75rem,3.5vw,2.75rem)] leading-none">
-            {headline.primary}
-            {headline.versus && (
-              <>
-                {" "}
-                <span className="text-smoke">vs</span> {headline.versus}
-              </>
+          <span className="min-w-0">
+            {flagged && (
+              <span
+                className={`mb-2 inline-block px-2 py-0.5 text-xs font-semibold uppercase ${
+                  m.status === "live" ? "bg-violet text-night" : "border border-line text-smoke"
+                }`}
+              >
+                {MATCH_STATUSES[m.status]}
+              </span>
             )}
+            <span className="font-display block text-[clamp(1.75rem,3.5vw,2.75rem)] leading-none">
+              {headline.primary}
+              {headline.versus && (
+                <>
+                  {" "}
+                  <span className="text-smoke">vs</span> {headline.versus}
+                </>
+              )}
+            </span>
+            <span className="mt-2 block text-sm text-smoke">{matchContext(m) || MATCH_FORMATS[m.format]}</span>
           </span>
-          <span className="mt-2 block text-sm text-smoke">{matchContext(m) || MATCH_FORMATS[m.format]}</span>
         </span>
         <span className="flex flex-col md:items-end">
           {kind === "results" ? (

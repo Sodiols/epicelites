@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { ScrambleText } from "@/components/ui/scramble-text";
@@ -23,6 +24,17 @@ export function MatchTeaser({ next, latest, teamName }: { next: Match | null; la
           </h2>
           {next && headline && when ? (
             <>
+              {next.cover_url && (
+                <div className="chamfer relative mt-5 aspect-[16/9] w-full max-w-2xl overflow-hidden bg-carbon [--cut:18px]">
+                  <Image
+                    src={next.cover_url}
+                    alt={`${next.event_name} cover`}
+                    fill
+                    sizes="(min-width: 768px) 672px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
               <p className="font-display mt-4 text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.86]">
                 {headline.primary}
                 {headline.versus && (
@@ -65,6 +77,17 @@ export function MatchTeaser({ next, latest, teamName }: { next: Match | null; la
             <h3 className="text-sm font-semibold text-smoke">Latest result</h3>
             {latest ? (
               <>
+                {latest.cover_url && (
+                  <div className="chamfer relative mt-4 aspect-[16/9] w-full overflow-hidden bg-carbon [--cut:14px]">
+                    <Image
+                      src={latest.cover_url}
+                      alt={`${latest.event_name} cover`}
+                      fill
+                      sizes="(min-width: 768px) 480px, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <p className="mt-3 text-2xl font-semibold">{latestParts.join("  /  ") || "Result confirmed"}</p>
                 <p className="mt-2 text-smoke">
                   {latest.scoring === "head_to_head" && latest.opponent ? `vs ${latest.opponent}, ` : ""}
