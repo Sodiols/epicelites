@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
@@ -8,12 +9,14 @@ import { ClipReveal } from "@/components/ui/clip-reveal";
 import { SplitReveal } from "@/components/ui/split-reveal";
 import { getPartners, getSettings } from "@/lib/data/public";
 import { PARTNER_TYPES } from "@/lib/labels";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About",
-  description: "Who Epic Elites are: a Free Fire esports team, what we play by, and the identity behind Rise Above.",
-  alternates: { canonical: "/about" },
-};
+  description:
+    "Who Epic Elites are: a Free Fire esports team, the principles we play by and the identity behind Rise Above.",
+  path: "/about",
+});
 
 export default async function AboutPage() {
   const [settings, partners] = await Promise.all([getSettings(), getPartners()]);
@@ -57,7 +60,7 @@ export default async function AboutPage() {
 
       <section aria-labelledby="identity-title" className="mx-auto mt-24 grid max-w-[1400px] items-center gap-10 px-4 sm:px-8 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <Image src={settings.logoUrl} alt="" width={72} height={51} className="h-[51px] w-[72px] object-contain" />
+          <Image src={settings.logoUrl} alt={`${settings.teamName} crest`} width={72} height={51} className="h-[51px] w-[72px] object-contain" />
           <h2 id="identity-title" className="font-display mt-6 text-[clamp(3rem,6vw,5.5rem)] leading-[0.86]">
             Black. Violet. <span className="text-violet">Rise above.</span>
           </h2>
@@ -121,6 +124,7 @@ export default async function AboutPage() {
           </ul>
         </section>
       )}
+      <RelatedLinks pages={["roster", "matches", "faq"]} />
     </main>
   );
 }

@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@phosphor-icons/react/ssr";
+
+export const metadata: Metadata = {
+  title: "Page not found",
+  description: "This page does not exist or has moved. Return to the Epic Elites home page.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (

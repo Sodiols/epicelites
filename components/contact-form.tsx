@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRightIcon, CheckIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { easeOutExpo, snappy } from "@/lib/motion";
@@ -42,6 +43,10 @@ export function ContactForm({ email }: { email: string | null }) {
   const [pending, startTransition] = useTransition();
   const turnstile = useRef<TurnstileHandle>(null);
   const [verified, setVerified] = useState(false);
+  const router = useRouter();
+  // When the form became usable; the server rejects submissions faster than a person can type.
+  const [startedAt, setStartedAt] = useState("");
+  useEffect(() => setStartedAt(String(Date.now())), []);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,6 +83,8 @@ export function ContactForm({ email }: { email: string | null }) {
         setStatus("sent");
         setNotice("Message received. The team replies to the email address you gave.");
         form.reset();
+        router.push("/contact/thank-you");
+        return;
       } else {
         setStatus("failed");
         setNotice(result.message);
@@ -124,6 +131,8 @@ export function ContactForm({ email }: { email: string | null }) {
 
   return (
     <form ref={formRef} noValidate onSubmit={onSubmit} className="frame grid gap-6 p-6 [--cut:28px] sm:p-10">
+      <input type="hidden" name="started_at" value={startedAt} />
+
       {/* Honeypot: hidden from people and assistive tech, tempting to bots. */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
         <label>

@@ -73,7 +73,7 @@ export function SiteHeader() {
             <Link href="/" className="group flex items-center gap-3" aria-label={`${brand.teamName} home`}>
               <Image
                 src={brand.logoUrl}
-                alt=""
+                alt={`${brand.teamName} crest`}
                 width={36}
                 height={26}
                 priority

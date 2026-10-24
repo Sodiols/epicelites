@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageIntro } from "@/components/page-intro";
 import { MatchBoard } from "@/components/match-board";
 import { getMatches, getSettings } from "@/lib/data/public";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Matches & Results",
-  description: "Upcoming fixtures and verified results for Epic Elites, a Free Fire esports team.",
-  alternates: { canonical: "/matches" },
-};
+  description:
+    "Upcoming Free Fire fixtures, live matches and verified results for Epic Elites, with tournament, stage and start times.",
+  path: "/matches",
+});
 
 export default async function MatchesPage() {
   const [{ upcoming, results, other }, settings] = await Promise.all([getMatches(), getSettings()]);
@@ -20,6 +23,7 @@ export default async function MatchesPage() {
       />
       {/* Postponed and cancelled fixtures stay visible on the Upcoming tab, clearly labelled. */}
       <MatchBoard upcoming={[...upcoming, ...other]} results={results} teamName={settings.teamName} />
+      <RelatedLinks pages={["roster", "news", "faq"]} />
     </main>
   );
 }

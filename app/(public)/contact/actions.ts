@@ -23,11 +23,16 @@ const schema = z.object({
     .max(5000, "Keep your message under 5000 characters."),
 });
 
+const MIN_FILL_MS = 3_000;
+const MAX_FORM_AGE_MS = 24 * 60 * 60_000;
+const MAX_LINKS = 3;
+
 /**
  * Stores a visitor inquiry. Server Actions only accept same-origin POSTs; when Turnstile is
- * configured the token is verified before anything else runs; the payload is validated here
- * and again by database constraints; and three throttles apply: per IP on this server, per
- * sender email and site-wide in the database.
+ * configured the token is verified before anything else runs; a honeypot field, a minimum
+ * fill time and a link limit catch simple bots; the payload is validated here and again by
+ * database constraints; and three throttles apply: per IP on this server, per sender email
+ * and site-wide in the database.
  */
 export async function submitContact(form: FormData): Promise<ContactResult> {
   if (!isSupabaseConfigured) {
@@ -56,6 +61,26 @@ export async function submitContact(form: FormData): Promise<ContactResult> {
 
   // Honeypot: a field real visitors never see. Pretend success so bots learn nothing.
   if (raw.website) return { ok: true };
+
+  // Time trap: the form records when it was shown. Scripts post instantly; people take seconds.
+  const shownAt = Number(raw.started_at);
+  const elapsed = Date.now() - shownAt;
+  if (!Number.isFinite(shownAt) || elapsed < MIN_FILL_MS) {
+    return { ok: false, message: "That was sent too quickly. Check your message and send it again." };
+  }
+  if (elapsed > MAX_FORM_AGE_MS) {
+    return { ok: false, message: "This page has been open too long. Reload it and send your message again." };
+  }
+
+  // Link limit: real inquiries rarely need more than a few links; spam usually carries many.
+  const links = (raw.message ?? "").match(/https?:\/\/|www\./gi)?.length ?? 0;
+  if (links > MAX_LINKS) {
+    return {
+      ok: false,
+      message: `Messages can include at most ${MAX_LINKS} links.`,
+      fieldErrors: { message: `Remove some links; ${MAX_LINKS} at most.` },
+    };
+  }
 
   const limit = rateLimit(`contact:${ip}`, 5, 10 * 60_000);
   if (!limit.ok) {

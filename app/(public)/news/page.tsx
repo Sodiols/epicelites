@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeftIcon, ArrowRightIcon, MegaphoneSimpleIcon } from "@phosphor-icons/react/ssr";
@@ -8,12 +9,14 @@ import { NewsCard } from "@/components/news-card";
 import { getFeaturedNews, getNewsPage, NEWS_PAGE_SIZE } from "@/lib/data/public";
 import { NEWS_CATEGORIES } from "@/lib/labels";
 import { formatDate } from "@/lib/time";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "News",
-  description: "Official Epic Elites announcements: roster news, tournament entries and team updates.",
-  alternates: { canonical: "/news" },
-};
+  description:
+    "Official Epic Elites announcements: roster confirmations, tournament entries, results and team updates.",
+  path: "/news",
+});
 
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { page: pageParam } = await searchParams;
@@ -125,6 +128,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
           </nav>
         )}
       </section>
+      <RelatedLinks pages={["matches", "roster", "media"]} />
     </main>
   );
 }

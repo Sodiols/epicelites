@@ -32,7 +32,7 @@ export function Statement({ text, logoUrl }: { text: string; logoUrl: string }) 
     <section aria-label="About the team" className="relative px-4 py-28 sm:px-8 md:py-40">
       <div ref={ref} className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-12">
         <motion.div style={{ rotate, scale }} className="md:col-span-2 md:pt-3">
-          <Image src={logoUrl} alt="" width={96} height={68} className="h-[68px] w-24 object-contain" />
+          <Image src={logoUrl} alt="Epic Elites crest" width={96} height={68} className="h-[68px] w-24 object-contain" />
         </motion.div>
         <div className="md:col-span-10">
           <p className="text-[clamp(1.75rem,3.6vw,3.25rem)] leading-[1.12] font-medium tracking-tight">

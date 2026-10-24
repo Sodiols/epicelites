@@ -14,7 +14,7 @@ export async function SiteFooter() {
     <footer className="relative mt-24 overflow-hidden border-t border-line bg-carbon">
       <div className="mx-auto grid max-w-[1400px] gap-12 px-4 pt-16 pb-10 sm:px-8 md:grid-cols-12">
         <div className="md:col-span-5">
-          <Image src={settings.logoUrl} alt="" width={56} height={40} className="h-10 w-14 object-contain" />
+          <Image src={settings.logoUrl} alt={`${settings.teamName} crest`} width={56} height={40} className="h-10 w-14 object-contain" />
           <p className="mt-6 max-w-[34ch] text-smoke">{settings.footerDescription}</p>
           {settings.location && <p className="mt-3 text-sm text-smoke">{settings.location}</p>}
         </div>
@@ -22,7 +22,7 @@ export async function SiteFooter() {
         <nav aria-label="Footer" className="md:col-span-3">
           <h2 className="font-wide text-[0.6875rem] text-smoke">Explore</h2>
           <ul className="mt-5 grid gap-2.5">
-            {[...nav, { href: "/contact", label: "Contact" }].map((item) => (
+            {[...nav, { href: "/faq", label: "FAQ" }, { href: "/contact", label: "Contact" }].map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="link-underline text-bone hover:text-violet">
                   {item.label}

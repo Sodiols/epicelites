@@ -31,9 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.published_at ?? undefined,
       modifiedTime: post.updated_at,
       authors: post.author_name ? [post.author_name] : undefined,
-      images: post.cover_url ? [{ url: post.cover_url, alt: post.cover_alt ?? "" }] : undefined,
+      url: `/news/${post.slug}`,
+      siteName: "Epic Elites",
     },
-    twitter: { card: post.cover_url ? "summary_large_image" : "summary", title, description },
+    // The share image comes from ./opengraph-image.tsx (headline on the branded card).
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

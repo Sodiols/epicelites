@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { BrandProvider } from "@/components/brand-provider";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { getSettings } from "@/lib/data/public";
 
 // Public pages are regenerated at most every minute (PUBLIC_REVALIDATE_SECONDS), and
@@ -21,6 +22,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <SiteHeader />
       {children}
       <SiteFooter />
+      <GoogleAnalytics />
     </BrandProvider>
   );
 }

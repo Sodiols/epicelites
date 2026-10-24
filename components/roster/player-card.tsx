@@ -77,7 +77,7 @@ export function PlayerCard({ player, index, href, onOpen, layoutId, sizes, class
         {image && (
           <Image
             src={image.src}
-            alt=""
+            alt={`${player.name} in the Epic Elites jersey`}
             width={image.width}
             height={image.height}
             sizes={sizes ?? "(min-width: 1024px) 30vw, 80vw"}

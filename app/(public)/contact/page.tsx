@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import { PageIntro } from "@/components/page-intro";
 import { ContactForm } from "@/components/contact-form";
 import { getSettings } from "@/lib/data/public";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Contact",
-  description: "Contact Epic Elites about partnerships, tournament invitations, media requests or anything else.",
-  alternates: { canonical: "/contact" },
-};
+  description:
+    "Contact Epic Elites about partnerships, tournament invitations, media requests or anything else. Messages go straight to the team.",
+  path: "/contact",
+});
 
 export default async function ContactPage() {
   const settings = await getSettings();
@@ -66,6 +69,7 @@ export default async function ContactPage() {
           <ContactForm email={email} />
         </div>
       </div>
+      <RelatedLinks pages={["faq", "about", "news"]} />
     </main>
   );
 }

@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import { PageIntro } from "@/components/page-intro";
 import { RosterGrid } from "@/components/roster/roster-grid";
 import { getPlayers, getSettings } from "@/lib/data/public";
 import { pad } from "@/lib/team";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Roster",
-  description: "Meet the Epic Elites Free Fire roster and open each player's profile.",
-  alternates: { canonical: "/roster" },
-};
+  description:
+    "Meet the Epic Elites Free Fire roster: every player's role, jersey number and profile, updated as the lineup changes.",
+  path: "/roster",
+});
 
 export default async function RosterPage() {
   const [players, settings] = await Promise.all([getPlayers(), getSettings()]);
@@ -34,6 +37,7 @@ export default async function RosterPage() {
           The lineup is being finalized. Player profiles will appear here once they are announced.
         </p>
       )}
+      <RelatedLinks pages={["matches", "media", "about"]} />
     </main>
   );
 }

@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageIntro } from "@/components/page-intro";
 import { JerseyViewer } from "@/components/media/jersey-viewer";
 import { Gallery } from "@/components/media/gallery";
 import { getMedia, getSettings } from "@/lib/data/public";
+import { RelatedLinks } from "@/components/related-links";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Media & Kit",
-  description: "Turn the official Epic Elites black and violet jersey in 3D and browse the team gallery.",
-  alternates: { canonical: "/media" },
-};
+  description:
+    "Turn the official Epic Elites black and violet jersey in 3D and browse team photos, graphics and videos.",
+  path: "/media",
+});
 
 export default async function MediaPage() {
   const [settings, media] = await Promise.all([getSettings(), getMedia()]);
@@ -29,6 +32,7 @@ export default async function MediaPage() {
         </h2>
         <Gallery items={media} />
       </section>
+      <RelatedLinks pages={["roster", "news", "about"]} />
     </main>
   );
 }

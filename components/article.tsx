@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@phosphor-icons/react/ssr";
 import { NEWS_CATEGORIES } from "@/lib/labels";
+import { RelatedLinks } from "./related-links";
 import { renderMarkdown } from "@/lib/markdown";
 import { formatDate } from "@/lib/time";
 import type { NewsCategory } from "@/lib/supabase/types";
@@ -54,6 +55,7 @@ export function Article({ post, preview = false }: { post: ArticleData; preview?
           dangerouslySetInnerHTML={{ __html: renderMarkdown(post.body) }}
         />
       </article>
+      {!preview && <RelatedLinks pages={["news", "matches", "roster"]} />}
     </main>
   );
 }
