@@ -81,6 +81,7 @@ export function PlayerCard({ player, index, href, onOpen, layoutId, sizes, class
             width={image.width}
             height={image.height}
             sizes={sizes ?? "(min-width: 1024px) 30vw, 80vw"}
+            quality={90}
             className="h-full w-full object-contain object-bottom"
           />
         )}

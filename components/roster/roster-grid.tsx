@@ -227,6 +227,7 @@ function PlayerDialog({
                   width={image.width}
                   height={image.height}
                   sizes="(min-width: 768px) 45vw, 90vw"
+                  quality={90}
                   className="absolute inset-x-0 bottom-0 h-[92%] w-full object-contain object-bottom"
                 />
               )}

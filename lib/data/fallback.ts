@@ -20,12 +20,12 @@ type LegacyTeam = {
 const team = raw as LegacyTeam;
 
 const sizes: Record<string, [number, number]> = {
-  "player-01.webp": [1060, 1484],
-  "player-02.webp": [447, 559],
-  "player-03.webp": [422, 591],
-  "player-04.webp": [422, 591],
-  "player-05.png": [571, 793],
-  "player-06.webp": [422, 591],
+  "player-01-hd.webp": [1590, 2226],
+  "player-02-hd.webp": [1788, 2236],
+  "player-03-hd.webp": [1688, 2364],
+  "player-04-hd.webp": [1688, 2364],
+  "player-05-hd.png": [1713, 2379],
+  "player-06-hd.webp": [1688, 2364],
 };
 
 export const fallbackSettings: SiteSettings = {

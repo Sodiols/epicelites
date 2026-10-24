@@ -12,14 +12,15 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const team = JSON.parse(readFileSync(join(root, "content/team.json"), "utf8"));
 
-// Pixel sizes of the artwork shipped in public/images.
+// Pixel sizes of the artwork shipped in public/images (player portraits are the
+// Real-ESRGAN upscales, named -hd so no cache serves the old low-resolution files).
 const sizes = {
-  "player-01.webp": [1060, 1484],
-  "player-02.webp": [447, 559],
-  "player-03.webp": [422, 591],
-  "player-04.webp": [422, 591],
-  "player-05.png": [571, 793],
-  "player-06.webp": [422, 591],
+  "player-01-hd.webp": [1590, 2226],
+  "player-02-hd.webp": [1788, 2236],
+  "player-03-hd.webp": [1688, 2364],
+  "player-04-hd.webp": [1688, 2364],
+  "player-05-hd.png": [1713, 2379],
+  "player-06-hd.webp": [1688, 2364],
   "team-kit-v2.webp": [1900, 1106],
 };
 // Portraits photographed on black rather than cut out (none: every portrait is now transparent).
@@ -56,14 +57,15 @@ on conflict (id) do nothing;`,
 );
 lines.push("");
 
-lines.push("-- Players (portraits stay in public/images)");
+lines.push("-- Players (portraits stay in public/images). A player that already exists, by slug or by");
+lines.push("-- legacy number, is skipped: an admin may have renamed the slug since the first run.");
 team.players.forEach((p, i) => {
   const [w, h] = sizes[p.image] ?? [null, null];
   const slug = slugify(`player-${p.number}`) || `player-${i + 1}`;
   lines.push(
     `insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
 values (${q(slug)}, ${q(p.number)}, ${q(p.name)}, ${q(p.role)}, ${q(/^\d{1,3}$/.test(p.number) ? p.number : null)}, ${q(p.bio)}, ${q(`/images/${p.image}`)}, ${w ?? "null"}, ${h ?? "null"}, ${onBlack.has(p.image)}, ${i + 1})
-on conflict (slug) do nothing;`,
+on conflict do nothing;`,
   );
 });
 lines.push("");

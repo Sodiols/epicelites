@@ -11,6 +11,8 @@ const supabaseHost = (() => {
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
+    // 75 is the Next.js default; player portraits ask for 90 so faces and kit detail stay crisp.
+    qualities: [75, 90],
     remotePatterns: [
       // Uploaded media (public bucket objects only).
       ...(supabaseHost

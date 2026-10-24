@@ -920,25 +920,26 @@ values (1, 'Epic Elites', 'Free Fire', 'RISE ABOVE', 'Epic Elites is a Free Fire
   'This site is where the team keeps its roster, fixtures, media and official news. As the team grows, it records the players and the matches that shape the name.')
 on conflict (id) do nothing;
 
--- Players (portraits stay in public/images)
+-- Players (portraits stay in public/images). A player that already exists, by slug or by
+-- legacy number, is skipped: an admin may have renamed the slug since the first run.
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-01', '01', 'IGNITE', 'BOMBER', '01', 'Player details will be published when the roster is finalized.', '/images/player-01.webp', 1060, 1484, false, 1)
-on conflict (slug) do nothing;
+values ('player-01', '01', 'IGNITE', 'BOMBER', '01', 'Player details will be published when the roster is finalized.', '/images/player-01-hd.webp', 1590, 2226, false, 1)
+on conflict do nothing;
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-02', '02', 'TSUNAMI', 'RUSHER', '02', 'Player details will be published when the roster is finalized.', '/images/player-02.webp', 447, 559, false, 2)
-on conflict (slug) do nothing;
+values ('player-02', '02', 'TSUNAMI', 'RUSHER', '02', 'Player details will be published when the roster is finalized.', '/images/player-02-hd.webp', 1788, 2236, false, 2)
+on conflict do nothing;
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-03', '03', 'FRANCHIXX', 'SNIPER', '03', 'Player details will be published when the roster is finalized.', '/images/player-03.webp', 422, 591, false, 3)
-on conflict (slug) do nothing;
+values ('player-03', '03', 'FRANCHIXX', 'SNIPER', '03', 'Player details will be published when the roster is finalized.', '/images/player-03-hd.webp', 1688, 2364, false, 3)
+on conflict do nothing;
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-04', '04', 'JINN', 'RUSHER', '04', 'Player details will be published when the roster is finalized.', '/images/player-04.webp', 422, 591, false, 4)
-on conflict (slug) do nothing;
+values ('player-04', '04', 'JINN', 'RUSHER', '04', 'Player details will be published when the roster is finalized.', '/images/player-04-hd.webp', 1688, 2364, false, 4)
+on conflict do nothing;
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-05', '05', 'ARHAM', 'SUPPORTER', '05', 'Player details will be published when the roster is finalized.', '/images/player-05.png', 571, 793, false, 5)
-on conflict (slug) do nothing;
+values ('player-05', '05', 'ARHAM', 'SUPPORTER', '05', 'Player details will be published when the roster is finalized.', '/images/player-05-hd.png', 1713, 2379, false, 5)
+on conflict do nothing;
 insert into public.players (slug, legacy_key, display_name, role, jersey_number, bio, photo_url, photo_width, photo_height, photo_on_black, display_order)
-values ('player-06', '06', 'RAHU:', 'SUPPORTER', '06', 'Player details will be published when the roster is finalized.', '/images/player-06.webp', 422, 591, false, 6)
-on conflict (slug) do nothing;
+values ('player-06', '06', 'RAHU:', 'SUPPORTER', '06', 'Player details will be published when the roster is finalized.', '/images/player-06-hd.webp', 1688, 2364, false, 6)
+on conflict do nothing;
 
 -- Gallery: the kit image and every player portrait, published as they are today.
 insert into public.media_items (kind, category, title, caption, alt_text, url, width, height, is_published, display_order)
@@ -946,29 +947,29 @@ select 'image', 'kit', 'Team kit', 'Team kit, front and back', 'Epic Elites jers
        '/images/team-kit-v2.webp', 1900, 1106, true, 0
 where not exists (select 1 from public.media_items where url = '/images/team-kit-v2.webp');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'IGNITE in the Epic Elites jersey', '/images/player-01.webp', 1060, 1484, false, true, 1,
+select 'image', 'players', 'IGNITE in the Epic Elites jersey', '/images/player-01-hd.webp', 1590, 2226, false, true, 1,
        (select id from public.players where slug = 'player-01')
-where not exists (select 1 from public.media_items where url = '/images/player-01.webp');
+where not exists (select 1 from public.media_items where url = '/images/player-01-hd.webp');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'TSUNAMI in the Epic Elites jersey', '/images/player-02.webp', 447, 559, false, true, 2,
+select 'image', 'players', 'TSUNAMI in the Epic Elites jersey', '/images/player-02-hd.webp', 1788, 2236, false, true, 2,
        (select id from public.players where slug = 'player-02')
-where not exists (select 1 from public.media_items where url = '/images/player-02.webp');
+where not exists (select 1 from public.media_items where url = '/images/player-02-hd.webp');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'FRANCHIXX in the Epic Elites jersey', '/images/player-03.webp', 422, 591, false, true, 3,
+select 'image', 'players', 'FRANCHIXX in the Epic Elites jersey', '/images/player-03-hd.webp', 1688, 2364, false, true, 3,
        (select id from public.players where slug = 'player-03')
-where not exists (select 1 from public.media_items where url = '/images/player-03.webp');
+where not exists (select 1 from public.media_items where url = '/images/player-03-hd.webp');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'JINN in the Epic Elites jersey', '/images/player-04.webp', 422, 591, false, true, 4,
+select 'image', 'players', 'JINN in the Epic Elites jersey', '/images/player-04-hd.webp', 1688, 2364, false, true, 4,
        (select id from public.players where slug = 'player-04')
-where not exists (select 1 from public.media_items where url = '/images/player-04.webp');
+where not exists (select 1 from public.media_items where url = '/images/player-04-hd.webp');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'ARHAM in the Epic Elites jersey', '/images/player-05.png', 571, 793, false, true, 5,
+select 'image', 'players', 'ARHAM in the Epic Elites jersey', '/images/player-05-hd.png', 1713, 2379, false, true, 5,
        (select id from public.players where slug = 'player-05')
-where not exists (select 1 from public.media_items where url = '/images/player-05.png');
+where not exists (select 1 from public.media_items where url = '/images/player-05-hd.png');
 insert into public.media_items (kind, category, alt_text, url, width, height, on_black, is_published, display_order, player_id)
-select 'image', 'players', 'RAHU: in the Epic Elites jersey', '/images/player-06.webp', 422, 591, false, true, 6,
+select 'image', 'players', 'RAHU: in the Epic Elites jersey', '/images/player-06-hd.webp', 1688, 2364, false, true, 6,
        (select id from public.players where slug = 'player-06')
-where not exists (select 1 from public.media_items where url = '/images/player-06.webp');
+where not exists (select 1 from public.media_items where url = '/images/player-06-hd.webp');
 
 -- The kit announcement that used to be hard-coded on /news. It is kept as a DRAFT with no
 -- publication date: publish it from the dashboard if and when the team wants it public.

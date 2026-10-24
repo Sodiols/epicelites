@@ -12,13 +12,13 @@
     "discord": ""
   },
   "players": [
-    {"name": "IGNITE", "role": "BOMBER", "number": "01", "image": "player-01.webp", "bio": "Player details will be published when the roster is finalized."},
-    {"name": "TSUNAMI", "role": "RUSHER", "number": "02", "image": "player-02.webp", "bio": "Player details will be published when the roster is finalized."},
-    {"name": "FRANCHIXX", "role": "SNIPER", "number": "03", "image": "player-03.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "IGNITE", "role": "BOMBER", "number": "01", "image": "player-01-hd.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "TSUNAMI", "role": "RUSHER", "number": "02", "image": "player-02-hd.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "FRANCHIXX", "role": "SNIPER", "number": "03", "image": "player-03-hd.webp", "bio": "Player details will be published when the roster is finalized."},
     
-    {"name": "JINN", "role": "RUSHER", "number": "04", "image": "player-04.webp", "bio": "Player details will be published when the roster is finalized."},
-    {"name": "ARHAM", "role": "SUPPORTER", "number": "05", "image": "player-05.png", "bio": "Player details will be published when the roster is finalized."},
-    {"name": "RAHU:", "role": "SUPPORTER", "number": "06", "image": "player-06.webp", "bio": "Player details will be published when the roster is finalized."}
+    {"name": "JINN", "role": "RUSHER", "number": "04", "image": "player-04-hd.webp", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "ARHAM", "role": "SUPPORTER", "number": "05", "image": "player-05-hd.png", "bio": "Player details will be published when the roster is finalized."},
+    {"name": "RAHU:", "role": "SUPPORTER", "number": "06", "image": "player-06-hd.webp", "bio": "Player details will be published when the roster is finalized."}
     
   ],
   "upcomingMatches": [],
