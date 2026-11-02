@@ -10,6 +10,7 @@ import { MATCH_FORMATS, MATCH_STATUSES } from "@/lib/labels";
 import { matchContext, matchHeadline, resultParts } from "@/lib/match-display";
 import { formatMatchTime } from "@/lib/time";
 import { StreamButton } from "@/components/stream-button";
+import { ResultImage } from "@/components/result-image";
 
 type Tab = "upcoming" | "results";
 
@@ -128,7 +129,9 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
           <span className="block">{when.time}</span>
         </span>
         <span className="flex items-start gap-4 sm:gap-6">
-          {m.cover_url && (
+          {m.cover_url && (kind === "results" ? (
+            <ResultImage src={m.cover_url} eventName={m.event_name} />
+          ) : (
             <span className="chamfer relative aspect-[16/10] w-24 shrink-0 overflow-hidden bg-carbon [--cut:10px] sm:w-36">
               <Image
                 src={m.cover_url}
@@ -138,7 +141,7 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
                 className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
               />
             </span>
-          )}
+          ))}
           <span className="min-w-0">
             {flagged && (
               <span
