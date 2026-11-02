@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const SITE_NAME = "Epic Elites";
+import { SITE_NAME } from "@/lib/site-identity";
 
 /**
  * Metadata for a public page: unique title and description, canonical URL, and matching

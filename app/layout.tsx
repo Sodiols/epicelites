@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Geist_Mono } from "next/font/google";
 import { MotionProvider } from "@/components/motion-provider";
 import { getSettings } from "@/lib/data/public";
-import { siteUrl } from "@/lib/supabase/env";
+import { getSiteOrigin, SITE_NAME } from "@/lib/site-identity";
 import "./globals.css";
 
 /** The crest WebP the database ships with; when unchanged, the generated square icons are used. */
@@ -23,24 +23,27 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
-  const origin = settings.siteUrl ?? siteUrl;
+  const origin = getSiteOrigin(settings.siteUrl);
+  const title = `${SITE_NAME} | ${settings.game} Esports Team`;
+  const description = settings.description ??
+    `Official home of ${SITE_NAME}, a ${settings.game} esports team. Meet the roster, explore the kit and follow official match updates.`;
   return {
     metadataBase: new URL(origin),
+    applicationName: SITE_NAME,
     title: {
-      default: `${settings.teamName} | ${settings.game} Esports Team`,
-      template: `%s | ${settings.teamName}`,
+      default: title,
+      template: `%s | ${SITE_NAME}`,
     },
-    description:
-      settings.description ??
-      `Official home of ${settings.teamName}, a ${settings.game} esports team. Meet the roster, explore the kit and follow official match updates.`,
+    description,
     // Square icons generated from the crest (scripts/generate-icons.mjs). A favicon uploaded
     // in Website Settings replaces the tab icon; the home-screen icon stays the generated one.
     icons:
       settings.faviconUrl === DEFAULT_FAVICON
         ? {
             icon: [
-              { url: "/favicon.ico", sizes: "48x48" },
-              { url: "/icon.svg", type: "image/svg+xml" },
+              { url: "/favicon.ico", type: "image/x-icon", sizes: "16x16 32x32 48x48" },
+              { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+              { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
             ],
             apple: "/apple-touch-icon.png",
           }
@@ -50,9 +53,13 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: { google: "iEQ4_JCjqMIA2XScyuNewP0E9x8IZbxG1sdlqgcoWXY" },
     openGraph: {
       type: "website",
-      siteName: settings.teamName,
+      siteName: SITE_NAME,
+      locale: "en_US",
+      title,
+      description,
       images: [settings.ogImageUrl],
     },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

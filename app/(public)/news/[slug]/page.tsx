@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getNewsBySlug, getSettings } from "@/lib/data/public";
 import { markdownToText } from "@/lib/markdown";
-import { siteUrl } from "@/lib/supabase/env";
+import { getSiteOrigin, SITE_NAME } from "@/lib/site-identity";
 import { Article } from "@/components/article";
 
 // Articles render on first request and are then cached like every public page. Drafts and
@@ -26,16 +26,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: `/news/${post.slug}` },
     openGraph: {
       type: "article",
-      title,
+      title: `${title} | ${SITE_NAME}`,
       description,
       publishedTime: post.published_at ?? undefined,
       modifiedTime: post.updated_at,
       authors: post.author_name ? [post.author_name] : undefined,
       url: `/news/${post.slug}`,
-      siteName: "Epic Elites",
+      siteName: SITE_NAME,
+      locale: "en_US",
     },
     // The share image comes from ./opengraph-image.tsx (headline on the branded card).
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title: `${title} | ${SITE_NAME}`, description },
   };
 }
 
@@ -44,8 +45,8 @@ export default async function ArticlePage({ params }: Props) {
   const [post, settings] = await Promise.all([getNewsBySlug(slug), getSettings()]);
   if (!post) notFound();
 
-  const origin = settings.siteUrl ?? siteUrl;
-  const absolute = (u: string) => (u.startsWith("http") ? u : `${origin}${u}`);
+  const origin = getSiteOrigin(settings.siteUrl);
+  const absolute = (u: string) => new URL(u, `${origin}/`).href;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -54,8 +55,9 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: post.published_at,
     dateModified: post.updated_at,
     image: post.cover_url ? [absolute(post.cover_url)] : undefined,
-    author: { "@type": post.author_name ? "Person" : "Organization", name: post.author_name ?? settings.teamName },
-    publisher: { "@type": "Organization", name: settings.teamName, logo: { "@type": "ImageObject", url: absolute(settings.logoUrl) } },
+    author: { "@type": post.author_name ? "Person" : "Organization", name: post.author_name ?? SITE_NAME },
+    publisher: { "@type": "SportsTeam", "@id": `${origin}/#team`, name: SITE_NAME, url: `${origin}/`, logo: { "@type": "ImageObject", url: absolute(settings.logoUrl) } },
+    isPartOf: { "@type": "WebSite", "@id": `${origin}/#website`, name: SITE_NAME, url: `${origin}/` },
     mainEntityOfPage: `${origin}/news/${post.slug}`,
   };
 

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test:seo": "node --test scripts/test-site-identity.mjs",
     "test:db": "node scripts/test-database.mjs",
     "seed:generate": "node scripts/generate-seed.mjs",
     "sql:bundle": "node scripts/bundle-sql.mjs"

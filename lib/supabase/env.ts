@@ -5,6 +5,8 @@
  * NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is the current key name. Projects that still use the
  * legacy anon key can set NEXT_PUBLIC_SUPABASE_ANON_KEY instead.
  */
+import { getSiteOrigin } from "@/lib/site-identity";
+
 export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 export const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -12,7 +14,7 @@ export const supabaseKey =
 export const isSupabaseConfigured = supabaseUrl.length > 0 && supabaseKey.length > 0;
 
 /** Canonical public origin, without a trailing slash. */
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+export const siteUrl = getSiteOrigin();
 
 export const MEDIA_BUCKET = "media";
 

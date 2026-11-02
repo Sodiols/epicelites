@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllNewsSlugs, getSettings } from "@/lib/data/public";
-import { siteUrl } from "@/lib/supabase/env";
+import { getSiteOrigin } from "@/lib/site-identity";
 
 export const revalidate = 3600;
 
@@ -10,7 +10,7 @@ export const revalidate = 3600;
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [settings, posts] = await Promise.all([getSettings(), getAllNewsSlugs()]);
-  const base = (settings.siteUrl ?? siteUrl).replace(/\/$/, "");
+  const base = getSiteOrigin(settings.siteUrl);
 
   const pages: { path: string; changeFrequency: "daily" | "weekly" | "monthly"; priority: number }[] = [
     { path: "", changeFrequency: "daily", priority: 1 },

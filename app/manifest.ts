@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { SITE_NAME } from "@/lib/site-identity";
 
 /** Install/home-screen details for Android and desktop browsers. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Epic Elites",
-    short_name: "Epic Elites",
+    name: SITE_NAME,
+    short_name: SITE_NAME,
     description: "Official site of Epic Elites, a Free Fire esports team.",
     start_url: "/",
     display: "standalone",
