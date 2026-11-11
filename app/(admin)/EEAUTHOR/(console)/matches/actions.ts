@@ -5,7 +5,7 @@ import { authorize, type ActionResult } from "@/lib/auth/admin";
 import { refreshPublicSite } from "@/lib/admin/revalidate";
 import { removeStorageObjects } from "@/lib/admin/storage";
 import { fieldErrors, formToObject, uuid } from "@/lib/validations/common";
-import { headToHeadResultSchema, matchSchema, parseRounds, placementResultSchema } from "@/lib/validations/match";
+import { headToHeadResultSchema, matchSchema, parsePlayerStatistics, parseRounds, placementResultSchema } from "@/lib/validations/match";
 import type { MatchStatus } from "@/lib/supabase/types";
 
 const DB_ERROR = "The database rejected the change. Reload the page and try again.";
@@ -139,7 +139,7 @@ export async function saveResult(form: FormData): Promise<ActionResult> {
   const raw = formToObject(form);
   if (!uuid.safeParse(raw.id).success) return { ok: false, message: "Unknown match." };
 
-  const { data: match } = await db.from("matches").select("scoring, completed_at").eq("id", raw.id).maybeSingle();
+  const { data: match } = await db.from("matches").select("scoring").eq("id", raw.id).maybeSingle();
   if (!match) return { ok: false, message: "That match no longer exists." };
 
   const intent = raw.intent === "confirm" ? "confirm" : raw.intent === "unconfirm" ? "unconfirm" : "save";
@@ -149,37 +149,23 @@ export async function saveResult(form: FormData): Promise<ActionResult> {
 
   const { rounds, error: roundError } = match.scoring === "placement" ? parseRounds(form) : { rounds: [], error: null };
   if (roundError) return { ok: false, message: roundError };
+  const playerStats = parsePlayerStatistics(form);
+  if ("error" in playerStats) return { ok: false, message: playerStats.error };
 
   const values = parsed.data as Record<string, unknown>;
   const hasResult = Object.entries(values).some(([k, v]) => k !== "result_notes" && v !== null);
-  if (intent === "confirm" && !hasResult && rounds.length === 0) {
+  if (intent === "confirm" && !hasResult && rounds.length === 0 && playerStats.statistics.length === 0) {
     return { ok: false, message: "Enter at least one result figure before confirming." };
   }
 
-  const { error } = await db
-    .from("matches")
-    .update({
-      ...values,
-      status: "completed",
-      completed_at: match.completed_at ?? new Date().toISOString(),
-      result_confirmed: intent === "confirm",
-      ...(intent === "confirm" ? { is_published: true } : {}),
-    })
-    .eq("id", raw.id);
+  const { error } = await db.rpc("save_match_result", {
+    p_id: raw.id,
+    p_scoring: match.scoring,
+    p_result: { ...parsed.data, player_statistics: playerStats.statistics },
+    p_rounds: rounds,
+    p_confirm: intent === "confirm",
+  });
   if (error) return { ok: false, message: DB_ERROR };
-
-  if (match.scoring === "placement") {
-    const keep = rounds.map((r) => r.round_number);
-    const del = db.from("match_round_results").delete().eq("match_id", raw.id);
-    const { error: delError } = keep.length ? await del.not("round_number", "in", `(${keep.join(",")})`) : await del;
-    if (delError) return { ok: false, message: DB_ERROR };
-    if (rounds.length) {
-      const { error: upError } = await db
-        .from("match_round_results")
-        .upsert(rounds.map((r) => ({ ...r, match_id: raw.id })), { onConflict: "match_id,round_number" });
-      if (upError) return { ok: false, message: DB_ERROR };
-    }
-  }
 
   return done(
     intent === "confirm"

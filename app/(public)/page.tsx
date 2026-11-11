@@ -6,7 +6,7 @@ import { RosterPan } from "@/components/home/roster-pan";
 import { KitScrub } from "@/components/home/kit-scrub";
 import { MatchTeaser } from "@/components/home/match-teaser";
 import { Closing } from "@/components/home/closing";
-import { getLineup, getMatches, getNextMatch, getSettings } from "@/lib/data/public";
+import { getLineup, getMatchCenter } from "@/lib/data/public";
 import { getSiteOrigin, SITE_NAME } from "@/lib/site-identity";
 
 export const metadata: Metadata = {
@@ -30,12 +30,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [settings, lineup, next, matches] = await Promise.all([
-    getSettings(),
-    getLineup(),
-    getNextMatch(),
-    getMatches(),
-  ]);
+  const [lineup, { settings, featured, results }] = await Promise.all([getLineup(), getMatchCenter()]);
 
   const origin = getSiteOrigin(settings.siteUrl);
   const absolute = (u: string) => new URL(u, `${origin}/`).href;
@@ -71,7 +66,7 @@ export default async function HomePage() {
       <VelocityMarquee logoUrl={settings.logoUrl} />
       {lineup.length > 0 && <RosterPan players={lineup} />}
       <KitScrub front={settings.jerseyFrontUrl} back={settings.jerseyBackUrl} />
-      <MatchTeaser next={next} latest={matches.results[0] ?? null} teamName={settings.teamName} />
+      <MatchTeaser next={featured} latest={results[0] ?? null} teamName={settings.teamName} />
       <Closing />
     </main>
   );

@@ -48,6 +48,8 @@ export type PlayerRow = {
   role: string;
   jersey_number: string | null;
   bio: string | null;
+  achievements: string | null;
+  competitive_history: string | null;
   photo_url: string | null;
   photo_path: string | null;
   photo_width: number | null;
@@ -91,7 +93,15 @@ export type MatchRow = {
   result_confirmed: boolean;
   completed_at: string | null;
   result_notes: string | null;
+  player_statistics: PlayerStatistic[];
 } & Timestamps;
+
+export type PlayerStatistic = {
+  ign: string;
+  kills: number | null;
+  assists: number | null;
+  damage: number | null;
+};
 
 export type RoundRow = {
   id: string;
@@ -222,7 +232,7 @@ export type PublicPlayer = Pick<
 >;
 export type PublicMatch = Omit<
   MatchRow,
-  "cover_path" | "is_published" | "result_notes" | keyof Timestamps
+  "cover_path" | "is_published" | "result_notes" | "player_statistics" | keyof Timestamps
 >;
 export type PublicRound = Omit<RoundRow, keyof Timestamps>;
 export type PublicNews = Omit<NewsRow, "cover_path" | "status" | "created_at" | "created_by" | "updated_by">;
@@ -250,13 +260,19 @@ export type Database = {
     Views: {
       public_settings: ViewDef<PublicSettings>;
       public_players: ViewDef<PublicPlayer>;
+      public_player_details: ViewDef<Pick<PlayerRow, "id" | "achievements" | "competitive_history">>;
       public_matches: ViewDef<PublicMatch>;
+      public_match_statistics: ViewDef<Pick<MatchRow, "id" | "player_statistics">>;
       public_match_rounds: ViewDef<PublicRound>;
       public_news: ViewDef<PublicNews>;
       public_media: ViewDef<PublicMedia>;
       public_partners: ViewDef<PublicPartner>;
     };
     Functions: {
+      save_match_result: {
+        Args: { p_id: string; p_scoring: MatchScoring; p_result: object; p_rounds: object[]; p_confirm: boolean };
+        Returns: undefined;
+      };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       is_owner: { Args: Record<string, never>; Returns: boolean };
       submit_contact_message: {

@@ -49,6 +49,7 @@ While these variables are missing, the public site runs in setup mode from `cont
 | `migrations/20261023000100_core_schema.sql` | Tables, constraints, indexes, `updated_at` triggers |
 | `migrations/20261023000200_security.sql` | Admin role functions, Row Level Security, grants, public read-only views, contact submission and admin-management functions |
 | `migrations/20261023000300_audit_storage.sql` | Audit triggers, the `media` Storage bucket and its policies, realtime for the inbox |
+| `migrations/20261111000100_profiles_and_match_statistics.sql` | Player achievements and competitive history, and player statistics on confirmed match results |
 | `seed.sql` | The six current players with their portraits, team settings, the gallery, and the kit announcement as an unpublished draft |
 
 **Option B, Supabase CLI.**
@@ -62,6 +63,8 @@ npx supabase db push
 Then run `supabase/seed.sql` in the SQL Editor.
 
 The seed is safe to run more than once; it never duplicates or overwrites records you have edited. After changing `content/team.json` before first setup, regenerate it with `npm run seed:generate` and rebundle with `npm run sql:bundle`.
+
+On an existing site, apply `20261111000100_profiles_and_match_statistics.sql` before deploying the roster and match archive update. Enter verified achievements and history in the player editor. In the match result editor, add the IGN and available scorecard figures, then confirm the result to publish them. Use the Tournament category for tournament gallery photos and the Roster Announcements category for roster updates.
 
 ## Step 4: Create the first administrator
 

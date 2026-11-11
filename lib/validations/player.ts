@@ -15,6 +15,8 @@ export const playerSchema = z
       .transform((v) => (v === "" ? null : v)),
     slug,
     bio: optionalText(1200),
+    achievements: optionalText(1200),
+    competitive_history: optionalText(1600),
     region: optionalText(60),
     joined_on: z
       .string()

@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function RosterPage() {
-  const [players, settings] = await Promise.all([getPlayers(), getSettings()]);
+  const [players, settings] = await Promise.all([getPlayers(true), getSettings()]);
 
   return (
     <main id="main" className="pb-40">

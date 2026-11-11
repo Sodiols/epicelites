@@ -9,6 +9,7 @@ import { ArrowLeftIcon, ArrowRightIcon, XIcon } from "@phosphor-icons/react";
 import { PlayerCard } from "@/components/roster/player-card";
 import { easeOutExpo, heavy, snappy } from "@/lib/motion";
 import { pad } from "@/lib/team";
+import { formatDate } from "@/lib/time";
 import type { Player } from "@/lib/data/public";
 
 const matches = (p: Player, key: string | null) => key !== null && (p.slug === key || p.legacyKey === key);
@@ -266,7 +267,7 @@ function PlayerDialog({
                 ["Team", teamName],
                 ["Game", game],
                 ["Role", p.role],
-                ["In-game name", p.inGameName],
+                ["IGN", p.inGameName],
                 ["Number", p.number],
                 ["Region", p.region],
               ] as const
@@ -280,7 +281,12 @@ function PlayerDialog({
             ))}
           </dl>
 
-          {p.bio && <p className="mt-6 max-w-[48ch] text-lg text-smoke">{p.bio}</p>}
+          {p.bio && (
+            <p className="mt-6 max-w-[48ch] whitespace-pre-line text-lg text-smoke">
+              {p.bio.replace(/\*\*([^*]+)\*\*/g, "$1")}
+            </p>
+          )}
+          <ProfileDetails player={p} teamName={teamName} />
           {p.socials.length > 0 && (
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
               {p.socials.map((link) => (
@@ -325,5 +331,44 @@ function PlayerDialog({
         </motion.button>
       </div>
     </motion.div>
+  );
+}
+
+function ProfileDetails({ player, teamName }: { player: Player; teamName: string }) {
+  const achievements = profileLines(player.achievements);
+  const history = profileLines(player.competitiveHistory);
+
+  return (
+    <div className="mt-6 grid gap-5 border-t border-line pt-5 sm:grid-cols-2">
+      <section>
+        <h3 className="text-sm font-semibold">Achievements</h3>
+        {achievements.length ? <ProfileList entries={achievements} /> : (
+          <p className="mt-2 text-sm text-smoke">No individual achievements published yet.</p>
+        )}
+      </section>
+      <section>
+        <h3 className="text-sm font-semibold">Competitive history</h3>
+        {player.joinedOn && (
+          <p className="mt-2 text-sm text-smoke">
+            Joined {teamName} on <time dateTime={player.joinedOn}>{formatDate(player.joinedOn)}</time>
+          </p>
+        )}
+        {history.length ? <ProfileList entries={history} /> : !player.joinedOn && (
+          <p className="mt-2 text-sm text-smoke">No competitive history published yet.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function profileLines(text: string | null): string[] {
+  return [...new Set(text?.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))];
+}
+
+function ProfileList({ entries }: { entries: string[] }) {
+  return (
+    <ul className="mt-2 list-disc space-y-1 pl-4 text-sm break-words text-smoke">
+      {entries.map((entry) => <li key={entry}>{entry}</li>)}
+    </ul>
   );
 }

@@ -19,6 +19,7 @@ type Tile = {
   caption: string;
   alt: string;
   videoId: string | null;
+  tournament: boolean;
 };
 
 function toTile(item: MediaItem): Tile | null {
@@ -37,6 +38,7 @@ function toTile(item: MediaItem): Tile | null {
       caption,
       alt: item.alt_text || caption || "Video",
       videoId: id,
+      tournament: item.category === "tournament",
     };
   }
   if (!item.url) return null;
@@ -50,6 +52,7 @@ function toTile(item: MediaItem): Tile | null {
     caption,
     alt: item.alt_text || caption,
     videoId: null,
+    tournament: item.category === "tournament",
   };
 }
 
@@ -58,23 +61,44 @@ function toTile(item: MediaItem): Tile | null {
  * (shared-element transition) and closing sends it back to exactly where it came from.
  */
 export function Gallery({ items }: { items: MediaItem[] }) {
-  const tiles = items.map(toTile).filter((t): t is Tile => t !== null);
+  const all = items.map(toTile).filter((t): t is Tile => t !== null);
+  const [filter, setFilter] = useState<"all" | "tournament" | "video">("all");
+  const tiles = all.filter((tile) => filter === "all" || (filter === "video" ? tile.kind === "video" : tile.tournament && tile.kind === "image"));
   const [active, setActive] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
-  const returnFocus = useRef<HTMLElement | null>(null);
   useEffect(() => setMounted(true), []);
 
   const close = useCallback(() => {
     setActive(null);
-    requestAnimationFrame(() => returnFocus.current?.focus());
   }, []);
 
-  if (tiles.length === 0) {
+  if (all.length === 0) {
     return <p className="text-lg text-smoke">New photos and videos will appear here as the team publishes them.</p>;
   }
 
   return (
     <LayoutGroup>
+      <div aria-label="Filter gallery" role="group" className="mb-8 flex flex-wrap gap-2">
+        {([
+          ["all", "All media"],
+          ["tournament", "Tournament photos"],
+          ["video", "Videos"],
+        ] as const).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={filter === value}
+            className={`btn ${filter === value ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => {
+              setActive(null);
+              setFilter(value);
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {tiles.length === 0 && <p role="status" className="text-smoke">No {filter === "video" ? "videos" : "tournament photos"} published yet.</p>}
       <ul className="columns-1 gap-6 sm:columns-2 lg:columns-3">
         {tiles.map((item, i) => (
           <motion.li
@@ -89,10 +113,8 @@ export function Gallery({ items }: { items: MediaItem[] }) {
               type="button"
               className="group block w-full text-left"
               aria-label={`${item.kind === "video" ? "Play video" : "View larger"}: ${item.caption || item.alt}`}
-              onClick={(e) => {
-                returnFocus.current = e.currentTarget;
-                setActive(i);
-              }}
+              aria-haspopup="dialog"
+              onClick={() => setActive(i)}
             >
               <motion.span
                 layoutId={`media-${item.id}`}
@@ -155,27 +177,37 @@ function Lightbox({
   onClose: () => void;
   onChange: (i: number) => void;
 }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const item = tiles[index];
-  const go = (d: number) => onChange((index + d + tiles.length) % tiles.length);
+  const canBrowse = tiles.length > 1;
+  const go = (d: number) => {
+    if (canBrowse) onChange((index + d + tiles.length) % tiles.length);
+  };
   const label = item.caption || item.alt;
 
   useEffect(() => {
+    const dialog = dialogRef.current;
+    const previousOverflow = document.documentElement.style.overflow;
+    dialog?.showModal();
     closeRef.current?.focus();
     document.documentElement.style.overflow = "hidden";
     return () => {
-      document.documentElement.style.overflow = "";
+      dialog?.close();
+      document.documentElement.style.overflow = previousOverflow;
     };
   }, []);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
       aria-label={label}
-      className="fixed inset-0 z-[70] grid place-items-center overscroll-contain p-4 sm:p-10"
+      className="fixed inset-0 m-0 grid h-dvh max-h-none w-screen max-w-none place-items-center overscroll-contain bg-transparent p-4 text-bone sm:p-10"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
         if (e.key === "ArrowRight") go(1);
         if (e.key === "ArrowLeft") go(-1);
       }}
@@ -221,29 +253,36 @@ function Lightbox({
       </motion.figure>
 
       <motion.div
-        className="relative z-10 mt-4 flex w-full max-w-xl items-center justify-between gap-4"
+        className={`relative z-10 mt-4 flex w-full max-w-xl items-center gap-4 ${canBrowse ? "justify-between" : "justify-center"}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={snappy}
       >
-        <button
+        {canBrowse && <button
           type="button"
           onClick={() => go(-1)}
           aria-label="Previous item"
           className="grid size-11 place-items-center border border-line bg-night transition-colors hover:border-violet hover:text-violet"
         >
           <ArrowLeftIcon size={18} />
-        </button>
-        <p className="truncate text-sm font-medium">{label}</p>
-        <button
+        </button>}
+        <div className="min-w-0 text-center">
+          <p className="truncate text-sm font-medium">{label}</p>
+          {item.videoId && (
+            <a className="link-underline text-sm text-violet" href={`https://www.youtube.com/watch?v=${item.videoId}`} target="_blank" rel="noopener noreferrer">
+              Watch on YouTube
+            </a>
+          )}
+        </div>
+        {canBrowse && <button
           type="button"
           onClick={() => go(1)}
           aria-label="Next item"
           className="grid size-11 place-items-center border border-line bg-night transition-colors hover:border-violet hover:text-violet"
         >
           <ArrowRightIcon size={18} />
-        </button>
+        </button>}
       </motion.div>
 
       <motion.button
@@ -259,6 +298,6 @@ function Lightbox({
       >
         <XIcon size={20} />
       </motion.button>
-    </div>
+    </dialog>
   );
 }

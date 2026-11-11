@@ -189,12 +189,41 @@ r = await user(EDITOR, "update public.matches set result_confirmed = true where 
 check("result cannot be confirmed before the match is completed", r.error !== null);
 r = await anon("select br_placement from public.public_matches where id = $1", [matchId]);
 check("unconfirmed result stays hidden from the public", r.rows[0]?.br_placement === null);
-r = await user(EDITOR, "update public.matches set status = 'completed', completed_at = now(), result_confirmed = true where id = $1", [matchId]);
+const figures = JSON.stringify({
+  br_placement: 2,
+  br_kills: 14,
+  player_statistics: [{ ign: "Test IGN", kills: 0, assists: null, damage: 400 }],
+});
+const saveResultSql = "select public.save_match_result($1, 'placement', $2, $3, $4)";
+r = await user(OUTSIDER, saveResultSql, [matchId, figures, "[]", true]);
+check("non-admin cannot save a match result", r.error !== null);
+r = await user(EDITOR, saveResultSql, [matchId, figures, "[]", false]);
+check("editor saves draft player statistics", r.error === null, r.error?.message);
+r = await anon("select id from public.public_match_statistics where id = $1", [matchId]);
+check("unconfirmed player statistics stay private", r.rows.length === 0);
+r = await user(EDITOR, saveResultSql, [matchId, figures, '[{"round_number":0}]', true]);
+check("invalid round causes the result write to fail", r.error !== null);
+r = await anon("select id from public.public_match_statistics where id = $1", [matchId]);
+check("failed round write rolls back result confirmation", r.rows.length === 0);
+r = await user(EDITOR, saveResultSql, [matchId, figures, '[{"round_number":1,"kills":14}]', true]);
 check("editor completes and confirms the result", r.error === null, r.error?.message);
 r = await anon("select br_placement, br_kills from public.public_matches where id = $1", [matchId]);
 check("confirmed result is public", r.rows[0]?.br_placement === 2 && r.rows[0]?.br_kills === 14);
+r = await anon("select player_statistics from public.public_match_statistics where id = $1", [matchId]);
+check("public statistics distinguish zero from unavailable", r.rows[0]?.player_statistics[0]?.kills === 0 && r.rows[0]?.player_statistics[0]?.assists === null);
+r = await anon("select kills from public.public_match_rounds where match_id = $1", [matchId]);
+check("round details are committed with the result", r.rows[0]?.kills === 14);
 r = await user(EDITOR, "update public.matches set h2h_team_score = 3 where id = $1", [matchId]);
 check("head-to-head score cannot be stored on a placement match", r.error !== null);
+
+r = await user(EDITOR, "insert into public.players (slug, display_name, achievements, competitive_history, is_active) values ('test-player', 'Test player', 'Test achievement', 'Test event', false) returning id");
+const profileId = r.rows[0]?.id;
+check("editor can record player profile details", !!profileId, r.error?.message);
+r = await anon("select id from public.public_player_details where id = $1", [profileId]);
+check("inactive player details stay private", r.rows.length === 0);
+await user(EDITOR, "update public.players set is_active = true where id = $1", [profileId]);
+r = await anon("select achievements, competitive_history from public.public_player_details where id = $1", [profileId]);
+check("active player details are public", r.rows[0]?.achievements === "Test achievement" && r.rows[0]?.competitive_history === "Test event");
 
 r = await user(EDITOR, `insert into public.news_posts (slug, title, status, published_at) values ('later', 'Later', 'published', now() + interval '1 day')`);
 check("editor schedules a post", r.error === null, r.error?.message);

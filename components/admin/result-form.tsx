@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { saveResult } from "@/app/(admin)/EEAUTHOR/(console)/matches/actions";
-import type { MatchRow, RoundRow } from "@/lib/supabase/types";
+import type { MatchRow, PlayerStatistic, RoundRow } from "@/lib/supabase/types";
 import { FormError, SelectField, TextAreaField, TextField } from "./fields";
 import { useActionForm } from "./use-action-form";
 import { Badge } from "./ui";
@@ -153,6 +153,7 @@ export function ResultForm({ match, rounds: initialRounds }: { match: MatchRow; 
         </div>
       )}
 
+      <PlayerStatistics initial={match.player_statistics ?? []} onRemove={formProps.onChange} />
       <TextAreaField label="Internal notes" name="result_notes" rows={2} maxLength={1000} defaultValue={match.result_notes ?? ""} help="Source of the result, screenshot reference. Never shown publicly." />
 
       <div className="flex flex-wrap justify-end gap-2 border-t border-line pt-4">
@@ -169,5 +170,48 @@ export function ResultForm({ match, rounds: initialRounds }: { match: MatchRow; 
         </button>
       </div>
     </form>
+  );
+}
+
+function PlayerStatistics({ initial, onRemove }: { initial: PlayerStatistic[]; onRemove: () => void }) {
+  const [rows, setRows] = useState(() => initial.map((stat, key) => ({ key, stat })));
+  const [nextKey, setNextKey] = useState(initial.length);
+
+  return (
+    <fieldset className="grid gap-3">
+      <legend className="a-label mb-2">Player statistics (optional)</legend>
+      <p className="a-help">Use the IGN shown on the scorecard. Leave unavailable statistics blank and enter 0 for a recorded zero.</p>
+      {rows.map(({ key, stat }, i) => (
+        <div key={key} role="group" aria-label={`Player statistics row ${i + 1}`} className="grid grid-cols-2 items-end gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+          <TextField label="IGN" name="stat_ign" maxLength={60} defaultValue={stat.ign} />
+          <TextField label="Kills" name="stat_kills" type="number" min={0} max={1000} defaultValue={str(stat.kills)} />
+          <TextField label="Assists" name="stat_assists" type="number" min={0} max={1000} defaultValue={str(stat.assists)} />
+          <TextField label="Damage" name="stat_damage" type="number" min={0} max={1000000} defaultValue={str(stat.damage)} />
+          <button
+            type="button"
+            className="a-btn a-btn-ghost a-btn-icon"
+            aria-label={`Remove player statistics row ${i + 1}`}
+            onClick={() => {
+              setRows((current) => current.filter((row) => row.key !== key));
+              onRemove();
+            }}
+          >
+            <TrashIcon size={16} aria-hidden />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        disabled={rows.length >= 24}
+        className="a-btn a-btn-secondary a-btn-sm justify-self-start"
+        onClick={() => {
+          setRows((current) => [...current, { key: nextKey, stat: { ign: "", kills: null, assists: null, damage: null } }]);
+          setNextKey((key) => key + 1);
+        }}
+      >
+        <PlusIcon size={14} aria-hidden />
+        Add player statistics
+      </button>
+    </fieldset>
   );
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { assetUrl, checkbox, optionalHttpsUrl, optionalInt, optionalNumber, optionalText, requiredText } from "./common";
 import { isValidTimeZone, zonedInputToUtc } from "@/lib/time";
+import type { PlayerStatistic } from "@/lib/supabase/types";
 
 export const matchSchema = z
   .object({
@@ -55,6 +56,38 @@ export const headToHeadResultSchema = z.object({
     .transform((v) => (v ? v : null)),
   result_notes: optionalText(1000),
 });
+
+const playerStatisticSchema = z.object({
+  ign: requiredText(60),
+  kills: optionalInt(0, 1000),
+  assists: optionalInt(0, 1000),
+  damage: optionalInt(0, 1000000),
+}).refine(({ kills, assists, damage }) => kills !== null || assists !== null || damage !== null);
+
+export function parsePlayerStatistics(form: FormData): { statistics: PlayerStatistic[] } | { error: string } {
+  const names = form.getAll("stat_ign");
+  const kills = form.getAll("stat_kills");
+  const assists = form.getAll("stat_assists");
+  const damage = form.getAll("stat_damage");
+  if (names.length > 24 || [kills, assists, damage].some((column) => column.length !== names.length)) {
+    return { error: "Enter up to 24 player statistics rows." };
+  }
+  const statistics: PlayerStatistic[] = [];
+  const seen = new Set<string>();
+  for (const [index, ign] of names.entries()) {
+    const row = { ign, kills: kills[index], assists: assists[index], damage: damage[index] };
+    if (Object.values(row).every((value) => typeof value === "string" && !value.trim())) continue;
+    const parsed = playerStatisticSchema.safeParse(row);
+    if (!parsed.success) {
+      return { error: `Enter an IGN and at least one valid whole-number statistic in player row ${index + 1}.` };
+    }
+    const name = parsed.data.ign.toLowerCase();
+    if (seen.has(name)) return { error: "Enter only one row per player's IGN." };
+    seen.add(name);
+    statistics.push(parsed.data);
+  }
+  return { statistics };
+}
 
 export const roundSchema = z.object({
   round_number: z.number().int().min(1).max(50),

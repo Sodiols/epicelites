@@ -40,6 +40,9 @@ export function PlayerForm({ player }: { player?: PlayerRow }) {
     role: role || "Role",
     number: number || null,
     bio: null,
+    joinedOn: null,
+    achievements: null,
+    competitiveHistory: null,
     image: photo ? { src: photo.url, width: photo.width ?? 800, height: photo.height ?? 1000, onBlack } : null,
     region: null,
     socials: [],
@@ -113,6 +116,8 @@ export function PlayerForm({ player }: { player?: PlayerRow }) {
 
         <FormSection title="Profile">
           <TextAreaField label="Biography" name="bio" rows={5} maxLength={1200} defaultValue={player?.bio ?? ""} error={errors.bio} />
+          <TextAreaField label="Achievements" name="achievements" rows={3} maxLength={1200} defaultValue={player?.achievements ?? ""} error={errors.achievements} help="One verified achievement per line." />
+          <TextAreaField label="Competitive history" name="competitive_history" rows={3} maxLength={1600} defaultValue={player?.competitive_history ?? ""} error={errors.competitive_history} help="One verified event or team entry per line." />
           <div className="grid gap-5 sm:grid-cols-2">
             <TextField label="Country or region" name="region" maxLength={60} defaultValue={player?.region ?? ""} error={errors.region} />
             <TextField label="Joined the team" name="joined_on" type="date" defaultValue={player?.joined_on ?? ""} error={errors.joined_on} />

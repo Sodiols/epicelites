@@ -28,13 +28,17 @@ export function MatchBoard({
   teamName: string;
 }) {
   const [tab, setTab] = useState<Tab>("upcoming");
+  const [tournament, setTournament] = useState("");
+  const [resultLimit, setResultLimit] = useState(20);
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "upcoming", label: "Upcoming", count: upcoming.length },
-    { id: "results", label: "Results", count: results.length },
+    { id: "results", label: "Results archive", count: results.length },
   ];
   const refs = useRef<Record<Tab, HTMLButtonElement | null>>({ upcoming: null, results: null });
   const dir = tab === "upcoming" ? -1 : 1;
-  const list = tab === "upcoming" ? upcoming : results;
+  const query = tournament.trim().toLowerCase();
+  const archive = results.filter((match) => match.event_name.toLowerCase().includes(query));
+  const list = tab === "upcoming" ? upcoming : archive.slice(0, resultLimit);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -62,7 +66,7 @@ export function MatchBoard({
               aria-controls={`panel-${t.id}`}
               tabIndex={selected ? 0 : -1}
               onClick={() => setTab(t.id)}
-              className={`relative flex items-center gap-3 px-5 py-4 text-sm font-semibold tracking-[0.08em] uppercase transition-colors ${
+              className={`relative flex items-center gap-2 px-2 py-4 text-xs font-semibold tracking-[0.08em] whitespace-nowrap uppercase transition-colors sm:gap-3 sm:px-5 sm:text-sm ${
                 selected ? "text-bone" : "text-smoke hover:text-bone"
               }`}
               style={{ fontStretch: "112%" }}
@@ -99,14 +103,40 @@ export function MatchBoard({
             exit="exit"
             transition={{ duration: 0.6, ease: easeOutExpo }}
           >
+            {tab === "results" && results.length > 0 && (
+              <div className="my-6 flex flex-wrap items-end justify-between gap-3">
+                <label className="grid w-full max-w-xs gap-2 text-sm font-semibold">
+                  Find a tournament
+                  <input
+                    type="search"
+                    value={tournament}
+                    onChange={(event) => {
+                      setTournament(event.target.value);
+                      setResultLimit(20);
+                    }}
+                    className="min-h-11 border border-line bg-carbon px-3 font-normal text-bone"
+                  />
+                </label>
+                <p role="status" className="text-sm text-smoke">
+                  {list.length} of {archive.length} results
+                </p>
+              </div>
+            )}
             {list.length > 0 ? (
               <ol>
                 {list.map((f) => (
                   <FixtureRow key={f.id} fixture={f} kind={tab} teamName={teamName} />
                 ))}
               </ol>
+            ) : tab === "results" && results.length > 0 ? (
+              <p className="py-10 text-smoke">No tournaments match your search.</p>
             ) : (
               <EmptyBoard kind={tab} />
+            )}
+            {tab === "results" && archive.length > resultLimit && (
+              <button type="button" className="btn btn-ghost mt-6" onClick={() => setResultLimit((limit) => limit + 20)}>
+                Show more results
+              </button>
             )}
           </motion.div>
         </AnimatePresence>
@@ -123,7 +153,7 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
 
   return (
     <li className="group border-b border-line py-7 transition-colors hover:bg-carbon md:px-4">
-      <div className="grid gap-3 md:grid-cols-[11rem_1fr_auto] md:items-center md:gap-8">
+      <div className="grid gap-3 md:grid-cols-[8rem_minmax(0,1fr)] md:gap-x-8 lg:grid-cols-[11rem_minmax(0,1fr)_auto] lg:items-center">
         <span className="font-mono text-sm text-smoke tabular-nums">
           <time dateTime={m.starts_at}>{when.day}</time>
           <span className="block">{when.time}</span>
@@ -168,11 +198,22 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
               )}
             </span>
             <span className="mt-2 block text-sm text-smoke">{matchContext(m) || MATCH_FORMATS[m.format]}</span>
+            {kind === "results" && m.organizer && <span className="mt-1 block text-sm text-smoke">{m.organizer}</span>}
           </span>
         </span>
-        <span className="flex flex-col md:items-end">
+        <span className="flex flex-col md:col-start-2 lg:col-start-auto lg:items-end">
           {kind === "results" ? (
-            <span className="font-semibold text-violet">{result.join("  /  ") || "Result confirmed"}</span>
+            <>
+              <span className="font-semibold text-violet">{result.join("  /  ") || "Result confirmed"}</span>
+              {(m.br_placement_points !== null || m.br_kill_points !== null) && (
+                <span className="mt-1 text-xs text-smoke">
+                  {[
+                    m.br_placement_points !== null && `${m.br_placement_points} placement pts`,
+                    m.br_kill_points !== null && `${m.br_kill_points} kill pts`,
+                  ].filter(Boolean).join("  /  ")}
+                </span>
+              )}
+            </>
           ) : (
             <span className="text-sm text-smoke">{m.organizer ?? MATCH_FORMATS[m.format]}</span>
           )}
@@ -187,12 +228,12 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
         </span>
       </div>
       {kind === "results" && m.rounds.length > 0 && (
-        <details className="mt-4 md:ml-[13rem]">
+        <details className="mt-4 md:ml-40 lg:ml-52">
           <summary className="cursor-pointer text-sm font-semibold text-smoke hover:text-bone">
             Round by round
           </summary>
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[28rem] text-left text-sm tabular-nums">
+            <table className="w-full min-w-[22rem] text-left text-sm tabular-nums">
               <thead className="text-xs text-smoke uppercase">
                 <tr>
                   <th className="py-2 pr-4 font-semibold">Round</th>
@@ -210,6 +251,32 @@ function FixtureRow({ fixture: m, kind, teamName }: { fixture: Match; kind: Tab;
                     <td className="py-2 pr-4">{r.placement ?? "-"}</td>
                     <td className="py-2 pr-4">{r.kills ?? "-"}</td>
                     <td className="py-2">{r.total_points ?? "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+      {kind === "results" && m.playerStatistics.length > 0 && (
+        <details className="mt-4 md:ml-40 lg:ml-52">
+          <summary className="cursor-pointer text-sm font-semibold text-smoke hover:text-bone">Player statistics</summary>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[18rem] text-left text-sm tabular-nums">
+              <thead className="text-xs text-smoke uppercase">
+                <tr>
+                  {["IGN", "Kills", "Assists", "Damage"].map((label) => (
+                    <th key={label} scope="col" className="py-2 pr-3 font-semibold">{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {m.playerStatistics.map((player) => (
+                  <tr key={player.ign} className="border-t border-line">
+                    <th scope="row" className="py-2 pr-3 font-medium break-all">{player.ign}</th>
+                    <td className="py-2 pr-3">{player.kills ?? "—"}</td>
+                    <td className="py-2 pr-3">{player.assists ?? "—"}</td>
+                    <td className="py-2 pr-3">{player.damage ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

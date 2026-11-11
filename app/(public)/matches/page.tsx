@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { PageIntro } from "@/components/page-intro";
 import { MatchBoard } from "@/components/match-board";
-import { getMatches, getSettings } from "@/lib/data/public";
+import { getMatchCenter } from "@/lib/data/public";
 import { RelatedLinks } from "@/components/related-links";
 
 export const metadata: Metadata = pageMetadata({
@@ -13,16 +13,15 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function MatchesPage() {
-  const [{ upcoming, results, other }, settings] = await Promise.all([getMatches(), getSettings()]);
+  const { fixtures, results, settings } = await getMatchCenter(true);
 
   return (
     <main id="main" className="pb-24">
       <PageIntro
         title="Matches"
-        summary="Every confirmed fixture and verified result, in one place. Nothing is listed until it is official."
+        summary="Follow confirmed fixtures and browse verified tournament results, round scores and player statistics."
       />
-      {/* Postponed and cancelled fixtures stay visible on the Upcoming tab, clearly labelled. */}
-      <MatchBoard upcoming={[...upcoming, ...other]} results={results} teamName={settings.teamName} />
+      <MatchBoard upcoming={fixtures} results={results} teamName={settings.teamName} />
       <RelatedLinks pages={["roster", "news", "faq"]} />
     </main>
   );
