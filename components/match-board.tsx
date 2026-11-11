@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { CalendarBlankIcon, TrophyIcon } from "@phosphor-icons/react";
+import { CalendarBlankIcon, MagnifyingGlassIcon, TrophyIcon, XIcon } from "@phosphor-icons/react";
 import { easeOutExpo, snappy } from "@/lib/motion";
 import type { Match } from "@/lib/data/public";
 import { MATCH_FORMATS, MATCH_STATUSES } from "@/lib/labels";
@@ -30,6 +30,7 @@ export function MatchBoard({
   const [tab, setTab] = useState<Tab>("upcoming");
   const [tournament, setTournament] = useState("");
   const [resultLimit, setResultLimit] = useState(20);
+  const searchRef = useRef<HTMLInputElement>(null);
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "upcoming", label: "Upcoming", count: upcoming.length },
     { id: "results", label: "Results archive", count: results.length },
@@ -104,21 +105,38 @@ export function MatchBoard({
             transition={{ duration: 0.6, ease: easeOutExpo }}
           >
             {tab === "results" && results.length > 0 && (
-              <div className="my-6 flex flex-wrap items-end justify-between gap-3">
-                <label className="grid w-full max-w-xs gap-2 text-sm font-semibold">
-                  Find a tournament
+              <div role="search" aria-label="Results archive" className="mt-5 flex min-h-12 items-center gap-3 border-b border-line transition-colors focus-within:border-violet sm:gap-4 md:px-4">
+                <MagnifyingGlassIcon size={18} aria-hidden className="shrink-0 text-violet" />
+                <div className="flex min-w-0 flex-1 items-center">
                   <input
+                    ref={searchRef}
                     type="search"
+                    aria-label="Search tournaments"
+                    placeholder="Search tournaments"
                     value={tournament}
                     onChange={(event) => {
                       setTournament(event.target.value);
                       setResultLimit(20);
                     }}
-                    className="min-h-11 border border-line bg-carbon px-3 font-normal text-bone"
+                    className="min-h-12 w-full min-w-0 bg-transparent text-base text-bone outline-none! placeholder:text-smoke [&::-webkit-search-cancel-button]:hidden"
                   />
-                </label>
-                <p role="status" className="text-sm text-smoke">
-                  {list.length} of {archive.length} results
+                  {tournament && (
+                    <button
+                      type="button"
+                      aria-label="Clear tournament search"
+                      className="grid size-11 shrink-0 place-items-center text-smoke transition-colors hover:text-violet focus-visible:-outline-offset-2"
+                      onClick={() => {
+                        setTournament("");
+                        setResultLimit(20);
+                        searchRef.current?.focus();
+                      }}
+                    >
+                      <XIcon size={16} aria-hidden />
+                    </button>
+                  )}
+                </div>
+                <p role="status" className="shrink-0 text-xs whitespace-nowrap text-smoke tabular-nums sm:text-sm">
+                  {list.length < archive.length ? `${list.length} of ` : ""}{archive.length} {archive.length === 1 ? "result" : "results"}
                 </p>
               </div>
             )}
