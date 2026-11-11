@@ -44,7 +44,7 @@ export default async function HomePage() {
     "@type": "WebSite",
     "@id": `${origin}/#website`,
     name: SITE_NAME,
-    alternateName: "Epic Elites",
+    alternateName: ["Epic Elites", new URL(origin).hostname],
     url: `${origin}/`,
     publisher: { "@id": `${origin}/#team` },
     inLanguage: "en",
